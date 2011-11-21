@@ -1,0 +1,6 @@
+<RCC> 
+  <qresource prefix="/plugins/simplesvg" > 
+    <file>icon.png</file> 
+  </qresource> 
+</RCC> 
+
