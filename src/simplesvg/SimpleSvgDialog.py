@@ -23,14 +23,17 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
 from Ui_SimpleSvg import Ui_SimpleSvg
+from mapsizer.MapSizerDialog import MapSizerDialog
 
 # create the dialog for SimpleSvg
 class SimpleSvgDialog(QDialog):
-  def __init__(self): 
+  def __init__(self, iface): 
     QDialog.__init__(self) 
     # Set up the user interface from Designer. 
     self.ui = Ui_SimpleSvg ()
     self.ui.setupUi(self)
+    # little dialog for sizing map
+    self.sizer = MapSizerDialog(self, iface.mapCanvas())
 
 
   # see http://www.riverbankcomputing.com/Docs/PyQt4/pyqt4ref.html#connecting-signals-and-slots
@@ -40,7 +43,17 @@ class SimpleSvgDialog(QDialog):
     fileName = QFileDialog.getSaveFileName(self, "/home/richard/temp/svgtest.svg", "/home/richard/temp", "")
     # TODO do some checks to be sure there is no extension
     self.ui.txtFileName.setText(fileName)
+  @pyqtSignature("on_btnResizeMap_clicked()")
 
+  # show resize dialog (while hiding yourself, come back when resize dialog is closed
+  def on_btnResizeMap_clicked(self):
+    self.sizer.show()
+    self.hide()
+#    # TODO: find out how the OK/CANCEL stuff works
+#    if self.sizer.exec_() == QDialog.Accepted:
+#        self.show()
+#    else:
+#        self.show()
 
   def getFilePath(self):
     return self.ui.txtFileName.text()

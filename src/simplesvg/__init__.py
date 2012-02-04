@@ -24,7 +24,7 @@ def name():
 def description():
   return "Create simple SVG from current view, editable with Inkscape"
 def version():
-  return "Version 0.5"
+  return "Version 0.6"
 def qgisMinimumVersion():
   return "1.0"
 def classFactory(iface):

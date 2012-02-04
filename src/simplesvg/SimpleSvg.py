@@ -27,7 +27,7 @@ from PyQt4.QtGui import *
 from qgis.core import *
 # Initialize Qt resources from file resources.py
 import resources
-# Import the code for the dialog
+# Import the code for the dialogs
 from SimpleSvgDialog import SimpleSvgDialog
 
 SVG_TYPE_PATH = 1
@@ -85,7 +85,7 @@ class SimpleSvg:
     self.svgType = SVG_TYPE_PATH
     self.strokeLineJoin = 'round' # miter, round, bevel
 
-  def initGui(self):  
+  def initGui(self):
       # Create action that will start plugin configuration
     self.action = QAction(QIcon(":/plugins/simplesvg/icon.png"), \
             "Save as SVG", self.iface.mainWindow())
@@ -96,6 +96,8 @@ class SimpleSvg:
     self.iface.addToolBarIcon(self.action)
     self.iface.addPluginToMenu("&Save as SVG", self.action)
 
+    self.dlg = SimpleSvgDialog(self.iface)
+
   def unload(self):
     # Remove the plugin menu item and icon
     self.iface.removePluginMenu("&Save as SVG",self.action)
@@ -103,10 +105,9 @@ class SimpleSvg:
 
   # run method that performs all the real work
   def run(self):
-    dlg = SimpleSvgDialog()
-    dlg.show()
-    if dlg.exec_() == QDialog.Accepted:
-      self.svgFilename = dlg.getFilePath()
+    self.dlg.show()
+    if self.dlg.exec_() == QDialog.Accepted:
+      self.svgFilename = self.dlg.getFilePath()
       output = self.writeSVG()
       file = open(self.svgFilename, "w")
       #print output
@@ -262,7 +263,7 @@ class SimpleSvg:
       #print "***************** too much symbollayers ***************"
     sl = symbol.symbolLayer(0)
     slprops = sl.properties()
-    print "symbollayer properties: %s" % slprops
+    #print "symbollayer properties: %s" % slprops
     # region/polgyons have: color_border / style_border / offset / style / color / width_border
     #  {PyQt4.QtCore.QString(u'color_border'): PyQt4.QtCore.QString(u'0,0,0,255'), PyQt4.QtCore.QString(u'style_border'): PyQt4.QtCore.QString(u'solid'), PyQt4.QtCore.QString(u'offset'): PyQt4.QtCore.QString(u'0,0'), PyQt4.QtCore.QString(u'style'): PyQt4.QtCore.QString(u'solid'), PyQt4.QtCore.QString(u'color'): PyQt4.QtCore.QString(u'0,0,255,255'), PyQt4.QtCore.QString(u'width_border'): PyQt4.QtCore.QString(u'0.26')}
     # markers/points have : color_border / offset / size / color / name / angle:
@@ -441,17 +442,22 @@ class SimpleSvg:
       for symbol in renderer.symbols():
         lower = symbol.lowerValue()
         upper = symbol.upperValue()
-        #print "lower: %s upper: %s value: %s" % (lower, upper, value)
+        #print "lower: %s upper: %s value: %s notlower %s, notupper %s, value==lower %s, value=upper %s, str(value)[0].isdigit() %s" % (lower, upper, value, (not lower), (not upper), (value == lower), (value == upper), str(value)[0].isdigit())
         if not lower and not upper:
             # 'default value' given for default in Unique Value
             default = symbol
-        # Unique Value symbols have the value in both upper and lower value
-        elif value == lower and value == upper:
+        # Unique Value symbols have the value in both upper and lower value (if values are string!)
+        elif (value == lower and value == upper):
+          return symbol
+        # Unique Value symbols for numbers do not have an upper
+        elif str(value)[0].isdigit() and not upper and float(value) == float(symbol.lowerValue()):
           return symbol
         # Graduated Classifications have lower AND uppervalues AND values are always numbers
-        elif str(value)[0].isdigit() and (float(value) >= float(symbol.lowerValue())) and (float(value) <= float(symbol.upperValue())):
+        elif str(value)[0].isdigit() and upper and lower and (float(value) >= float(symbol.lowerValue()) and float(value) <= float(symbol.upperValue())):
           #print "Graduated Classification:  %s between %s and %s " % (value, symbol.lowerValue(), symbol.upperValue())
           return symbol
+        #else:
+        #  print "NEXT..."
       #print "RETURNING DEFAULT!!"
       return default
 

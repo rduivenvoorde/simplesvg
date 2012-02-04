@@ -1,5 +1,5 @@
 # Makefile for a PyQGIS plugin 
-UI_FILES = Ui_SimpleSvg.py
+UI_FILES = Ui_SimpleSvg.py mapsizer/Ui_MapSizer.py
 
 RESOURCE_FILES = resources.py
 
