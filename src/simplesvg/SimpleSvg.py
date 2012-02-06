@@ -77,6 +77,8 @@ SVG_TYPE_SHAPE = 2
 # http://www.carto.net/papers/svg/samples/symbol.shtml
 
 class SimpleSvg:
+  
+  MSG_BOX_TITLE = "QGIS SimpleSvg Plugin "
 
   def __init__(self, iface):
     # Save reference to the QGIS interface
@@ -163,10 +165,32 @@ class SimpleSvg:
     return layer.type()==0 and hasattr(layer, 'isUsingRendererV2') and layer.isUsingRendererV2()
 
   def writeVectorLayer(self, layer, labels=False):
+    # in case of 'on the fly projection' 
+    # AND 
+    # different srs's for mapCanvas/project and layer we have to reproject stuff
+    destinationSrs = self.iface.mapCanvas().mapRenderer().destinationSrs()
+    #print 'destination srs: %s:' % destinationSrs.toProj4()
+    layerSrs = layer.srs()
+    #print 'layer srs:       %s:' % layerSrs.toProj4()
+    mapCanvasExtent = self.iface.mapCanvas().extent()
+    doSrsTransform = False
+    if not destinationSrs == layerSrs:
+      # we have to transform the mapCanvasExtent to the data/layer Srs to be able
+      # to retrieve the features from the data provider
+      # but ONLY if we are working with on the fly projection
+      # (because in that case we just 'fly' to the raw coordinates from data)
+      if self.iface.mapCanvas().hasCrsTransformEnabled():
+        srsTransform = QgsCoordinateTransform(destinationSrs, layerSrs)
+        mapCanvasExtent = srsTransform.transformBoundingBox(mapCanvasExtent)
+        # we have to have a transformer to do the transformation of the geometries
+        # to the mapcanvas srs ourselves:
+        srsTransform = QgsCoordinateTransform(layerSrs, destinationSrs)
+        doSrsTransform = True
+
     # select features within current extent,
     #   with  ALL attributes, WITHIN currentExtent, WITH geom, AND using Intersect instead of bbox
     provider = layer.dataProvider();
-    provider.select(provider.attributeIndexes(), self.currentExtent, True, True)
+    provider.select(provider.attributeIndexes(), mapCanvasExtent, True, True)
     # we are going to group all features by their symbol so in svg we can group them in a <g> tag with the symbol style
     renderer = layer.renderer()
     if self.isRendererV2(layer):
@@ -186,6 +210,16 @@ class SimpleSvg:
     #print "1 symbols holds %s symbols" % len(symbols)
     while provider.nextFeature(f):
       feature = QgsFeature(f)
+
+      geom = feature.geometry()
+      layerSrs = layer.srs()
+      if doSrsTransform:
+        if hasattr(geom, "transform"):
+          geom.transform(srsTransform)
+        else:
+          QMessageBox.warning(self.iface.mainWindow(), self.MSG_BOX_TITLE, ("Cannot crs-transform geometry in your QGIS version ...\n" "Only QGIS version 1.5 and above can transform geometries on the fly\n" "As a workaround, you can try to save the layer in the destination crs (eg as shapefile) and reload that layer...\n"), QMessageBox.Ok, QMessageBox.Ok)
+          break
+
       symbol = self.symbolForFeature(layer, feature)
       #print "feature: %s  symbol: %s rgb: %s %s %s" % (feature, symbol, symbol.color().red(), symbol.color().green(), symbol.color().blue())
       # Continous Color does NOT have all symbols, but ONLY start and end color
@@ -202,12 +236,6 @@ class SimpleSvg:
           symbolFeatureMap[symbol]=[feature]
         else:
           symbolFeatureMap[symbol].append(feature)
-      # you would think this should work, but it is NOT
-#      symbols.append(symbol)
-#      if symbol in symbolFeatureMap:
-#          symbolFeatureMap[symbol]=[feature]
-#      else:
-#          symbolFeatureMap.update({symbol:[feature]})
     # now iterate over symbols IF there are any features in this view from this layer
     if feature != None:
       id=id+'_'
@@ -232,7 +260,15 @@ class SimpleSvg:
           if not labels:
             svg.extend(self.writeFeature(feature, id+str(i), labeltxt))
           if labels:
-            svg.extend(self.label2svg(feature, id+str(i), self.symbolForFeature(layer, feature), labeltxt))
+            geom = feature.geometry().centroid()
+            # centroid-method returns a NON-transformed centroid
+            if doSrsTransform:
+              if hasattr(geom, "transform"):
+                geom.transform(srsTransform)
+              else:
+                QMessageBox.warning(self.iface.mainWindow(), self.MSG_BOX_TITLE, ("Cannot crs-transform geometry in your QGIS version ...\n" "Only QGIS version 1.5 and above can transform geometries on the fly\n" "As a workaround, you can try to save the layer in the destination crs (eg as shapefile) and reload that layer...\n"), QMessageBox.Ok, QMessageBox.Ok)
+                break
+            svg.extend(self.label2svg(geom.asPoint(), id+str(i), self.symbolForFeature(layer, feature), labeltxt))
         svg.append(u'</g>\n'); # end of symbol
     svg.append(u'</g>\n'); # end of layer
     return svg
@@ -260,7 +296,6 @@ class SimpleSvg:
     sym={}
     if symbol.symbolLayerCount() > 1:
       QMessageBox.information(self.iface.mainWindow(), "Warning", "Layer '"+layer.name()+"' uses New Symbology, and styles with more the one Symbol Layer, only the first one will be use.")
-      #print "***************** too much symbollayers ***************"
     sl = symbol.symbolLayer(0)
     slprops = sl.properties()
     #print "symbollayer properties: %s" % slprops
@@ -340,9 +375,9 @@ class SimpleSvg:
       legend.setLayerVisible(lyr, True)
     return svg
 
-  def label2svg(self, feature, fid, symbol, labelTxt):
+  def label2svg(self, point, fid, symbol, labelTxt):
     # <g> <text x="262.08704" y="523.79077">abc</text> </g>
-    point = feature.geometry().centroid().asPoint()
+    #point = feature.geometry().centroid().asPoint()
     xy =  self.w2p(point.x(), point.y(), self.iface.mapCanvas().mapUnitsPerPixel(), self.currentExtent.xMinimum(), self.currentExtent.yMaximum())
     inkscapeLbl = ''
     if len(labelTxt)>0:
