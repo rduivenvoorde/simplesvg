@@ -3,8 +3,6 @@ UI_FILES = Ui_SimpleSvg.py mapsizer/Ui_MapSizer.py
 
 RESOURCE_FILES = resources.py
 
-
-
 default: compile
 	
 compile: $(UI_FILES) $(RESOURCE_FILES)

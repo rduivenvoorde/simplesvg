@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'Ui_SimpleSvg.ui'
 #
-# Created: Sat Feb  4 09:33:14 2012
+# Created: Mon Feb  6 22:49:47 2012
 #      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_SimpleSvg(object):
     def setupUi(self, SimpleSvg):
         SimpleSvg.setObjectName(_fromUtf8("SimpleSvg"))
-        SimpleSvg.resize(577, 510)
+        SimpleSvg.resize(678, 501)
         SimpleSvg.setWindowTitle(QtGui.QApplication.translate("SimpleSvg", "SimpleSvg", None, QtGui.QApplication.UnicodeUTF8))
         self.gridLayout = QtGui.QGridLayout(SimpleSvg)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
@@ -35,24 +35,7 @@ class Ui_SimpleSvg(object):
         self.txtHeading.setText(QtGui.QApplication.translate("SimpleSvg", "SimpleSvg Plugin", None, QtGui.QApplication.UnicodeUTF8))
         self.txtHeading.setAlignment(QtCore.Qt.AlignCenter)
         self.txtHeading.setObjectName(_fromUtf8("txtHeading"))
-        self.gridLayout.addWidget(self.txtHeading, 0, 1, 1, 2)
-        self.txtFileName = QtGui.QLineEdit(SimpleSvg)
-        self.txtFileName.setText(QtGui.QApplication.translate("SimpleSvg", "/home/richard/temp/svgtest.svg", None, QtGui.QApplication.UnicodeUTF8))
-        self.txtFileName.setObjectName(_fromUtf8("txtFileName"))
-        self.gridLayout.addWidget(self.txtFileName, 3, 1, 1, 1)
-        self.buttonBox = QtGui.QDialogButtonBox(SimpleSvg)
-        self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
-        self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
-        self.gridLayout.addWidget(self.buttonBox, 4, 0, 1, 3)
-        self.btnBrowse = QtGui.QPushButton(SimpleSvg)
-        self.btnBrowse.setText(QtGui.QApplication.translate("SimpleSvg", "Browse", None, QtGui.QApplication.UnicodeUTF8))
-        self.btnBrowse.setObjectName(_fromUtf8("btnBrowse"))
-        self.gridLayout.addWidget(self.btnBrowse, 3, 2, 1, 1)
-        self.btnResizeMap = QtGui.QPushButton(SimpleSvg)
-        self.btnResizeMap.setText(QtGui.QApplication.translate("SimpleSvg", "Resize Map or Set Extent", None, QtGui.QApplication.UnicodeUTF8))
-        self.btnResizeMap.setObjectName(_fromUtf8("btnResizeMap"))
-        self.gridLayout.addWidget(self.btnResizeMap, 2, 1, 1, 2)
+        self.gridLayout.addWidget(self.txtHeading, 0, 2, 1, 2)
         self.textEdit = QtGui.QTextEdit(SimpleSvg)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -64,24 +47,43 @@ class Ui_SimpleSvg(object):
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Ubuntu\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Sans Serif\'; font-size:10pt; font-weight:600;\">SimpleSvg is a plugin which tries to save current map as SVG.</span></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Sans Serif\'; font-size:10pt; font-weight:600;\">SimpleSvg is a plugin which tries to save the current map as SVG.</span></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'Sans Serif\'; font-size:10pt;\"></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Sans Serif\'; font-size:10pt;\">Trying to use plain svg, only adding some inkscape specific attributes to make it possible to use \'layers\' in inkscape.</span></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Sans Serif\'; font-size:10pt;\">It tries to use plain svg, only adding some inkscape specific attributes to make it possible to use \'layers\' in inkscape, and grouping svg-elements in a \'QGIS\'-way: </span></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Sans Serif\'; font-size:10pt;\">that is a layer in one group, and every class of a classification in it\'s own group.</span></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'Sans Serif\'; font-size:10pt;\"></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Sans Serif\'; font-size:10pt;\">It tries to group svg-elements in a \'qgis\'-way: that is a layer in one group, and every class of a classification in one group.</span></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'Sans Serif\'; font-size:10pt;\"></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Sans Serif\'; font-size:10pt;\">Layers have same label/id as in qgis</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Sans Serif\'; font-size:10pt;\">Labels and Id\'s within a layer have same String making it possible to select all elements within a class or group or element.</span></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Sans Serif\'; font-size:10pt;\">Labels and Id\'s within a layer have same name as in QGIS making it possible to select all elements within a class or group or element later in InkScape</span></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'Sans Serif\'; font-size:10pt;\"></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Sans Serif\'; font-size:10pt;\">For rasters it will take a screenshot of the layer and make an image-element with an external link to the screenshot.</span></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'Sans Serif\'; font-size:10pt;\"></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Sans Serif\'; font-size:10pt;\">For lines and polygons it tries to save both pen and symbol style. At the moment only working with \'old symbology\', \'new symbology\' not working yet.</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Sans Serif\'; font-size:10pt;\">For Points it can only save a point as a small colored circle.</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Sans Serif\'; font-size:10pt;\">At the moment NOT working for \'on the fly\'-projected layers.</span></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'Sans Serif\'; font-size:10pt;\"></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Sans Serif\'; font-size:10pt;\">For lines and polygons it tries to save both pen and symbol style.</span></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Sans Serif\'; font-size:10pt;\">For Points it can only save a point as a small colored circle. </span></p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Sans Serif\'; font-size:10pt;\">Please sent further ideas and requests to </span><span style=\" font-family:\'Sans Serif\'; font-size:10pt; font-style:italic;\">Richard Duivenvoorde:  richard@duif.net</span></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.textEdit.setObjectName(_fromUtf8("textEdit"))
-        self.gridLayout.addWidget(self.textEdit, 1, 1, 1, 2)
+        self.gridLayout.addWidget(self.textEdit, 1, 2, 1, 2)
+        self.btnResizeMap = QtGui.QPushButton(SimpleSvg)
+        self.btnResizeMap.setText(QtGui.QApplication.translate("SimpleSvg", "Resize Map or Set Extent", None, QtGui.QApplication.UnicodeUTF8))
+        self.btnResizeMap.setObjectName(_fromUtf8("btnResizeMap"))
+        self.gridLayout.addWidget(self.btnResizeMap, 2, 2, 1, 2)
+        self.txtFileName = QtGui.QLineEdit(SimpleSvg)
+        self.txtFileName.setText(QtGui.QApplication.translate("SimpleSvg", "/home/richard/temp/svgtest.svg", None, QtGui.QApplication.UnicodeUTF8))
+        self.txtFileName.setObjectName(_fromUtf8("txtFileName"))
+        self.gridLayout.addWidget(self.txtFileName, 3, 2, 1, 1)
+        self.btnBrowse = QtGui.QPushButton(SimpleSvg)
+        self.btnBrowse.setText(QtGui.QApplication.translate("SimpleSvg", "Browse", None, QtGui.QApplication.UnicodeUTF8))
+        self.btnBrowse.setObjectName(_fromUtf8("btnBrowse"))
+        self.gridLayout.addWidget(self.btnBrowse, 3, 3, 1, 1)
+        self.buttonBox = QtGui.QDialogButtonBox(SimpleSvg)
+        self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
+        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Help|QtGui.QDialogButtonBox.Ok)
+        self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
+        self.gridLayout.addWidget(self.buttonBox, 4, 0, 1, 4)
+        self.label = QtGui.QLabel(SimpleSvg)
+        self.label.setText(_fromUtf8(""))
+        self.label.setPixmap(QtGui.QPixmap(_fromUtf8(":/plugins/simplesvg/inkscape.png")))
+        self.label.setObjectName(_fromUtf8("label"))
+        self.gridLayout.addWidget(self.label, 0, 1, 4, 1)
 
         self.retranslateUi(SimpleSvg)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), SimpleSvg.accept)
@@ -91,3 +93,4 @@ class Ui_SimpleSvg(object):
     def retranslateUi(self, SimpleSvg):
         pass
 
+import resources_rc
