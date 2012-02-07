@@ -19,6 +19,7 @@ email                : richard@duif.net
  ***************************************************************************/
 """
 
+
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
@@ -49,11 +50,9 @@ class SimpleSvgDialog(QDialog):
   def on_btnResizeMap_clicked(self):
     self.sizer.show()
     self.hide()
-#    # TODO: find out how the OK/CANCEL stuff works
-#    if self.sizer.exec_() == QDialog.Accepted:
-#        self.show()
-#    else:
-#        self.show()
+
+  def on_buttonBox_helpRequested(self):
+    self.emit(SIGNAL("showHelp()") )
 
   def getFilePath(self):
     return self.ui.txtFileName.text()

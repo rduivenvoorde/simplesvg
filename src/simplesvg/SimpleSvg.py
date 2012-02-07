@@ -21,6 +21,8 @@ email                : richard@duif.net
 BUGS:
 
 """
+
+import os.path
 # Import the PyQt and QGIS libraries
 from PyQt4.QtCore import * 
 from PyQt4.QtGui import *
@@ -92,18 +94,50 @@ class SimpleSvg:
     self.action = QAction(QIcon(":/plugins/simplesvg/icon.png"), \
             "Save as SVG", self.iface.mainWindow())
     # connect the action to the run method
-    QObject.connect(self.action, SIGNAL("activated()"), self.run) 
+    QObject.connect(self.action, SIGNAL("activated()"), self.run)
 
     # Add toolbar button and menu item
     self.iface.addToolBarIcon(self.action)
     self.iface.addPluginToMenu("&Save as SVG", self.action)
 
     self.dlg = SimpleSvgDialog(self.iface)
+    QObject.connect(self.dlg, SIGNAL("showHelp()"), self.showHelp)
+
+    # about
+    self.aboutAction = QAction(QIcon(":/plugins/simplesvg/help.png"), \
+                          "About", self.iface.mainWindow())
+    self.aboutAction.setWhatsThis("SimpleSvg Plugin About")
+    self.iface.addPluginToMenu("&Save as SVG", self.aboutAction)
+    QObject.connect(self.aboutAction, SIGNAL("activated()"), self.about)
+    # help
+    self.helpAction = QAction(QIcon(":/plugins/simplesvg/help.png"), \
+                          "Help", self.iface.mainWindow())
+    self.helpAction.setWhatsThis("SimpleSvg Plugin Help")
+    self.iface.addPluginToMenu("&Save as SVG", self.helpAction)
+    QObject.connect(self.helpAction, SIGNAL("activated()"), self.showHelp)
+
+  def showHelp(self):
+    docFile = os.path.join(os.path.dirname(__file__), "docs","index.html")
+    QDesktopServices.openUrl( QUrl("file:" + docFile) )
+
+  def about(self):
+    infoString = QString("Written by Richard Duivenvoorde\nEmail - richard@duif.net\n")
+    infoString = infoString.append("Company - http://www.webmapper.net\n")
+    infoString = infoString.append("Source: http://hub.qgis.org/projects/simplesvg/")
+    QMessageBox.information(self.iface.mainWindow(), \
+              "SimpleSvg Plugin About", infoString)
+
 
   def unload(self):
     # Remove the plugin menu item and icon
     self.iface.removePluginMenu("&Save as SVG",self.action)
+    self.iface.removePluginMenu("&Save as SVG",self.helpAction)
+    self.iface.removePluginMenu("&Save as SVG",self.aboutAction)
     self.iface.removeToolBarIcon(self.action)
+
+    QObject.disconnect(self.aboutAction, SIGNAL("activated()"), self.about)
+    QObject.disconnect(self.helpAction, SIGNAL("activated()"), self.showHelp)
+    QObject.disconnect(self.action, SIGNAL("activated()"), self.run)
 
   # run method that performs all the real work
   def run(self):
