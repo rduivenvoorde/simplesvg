@@ -110,13 +110,14 @@ p, li { white-space: pre-wrap; }
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap resource="resources.qrc">:/plugins/simplesvg/inkscape.png</pixmap>
+      <pixmap resource="resources_rc.qrc">:/plugins/simplesvg/inkscape.png</pixmap>
      </property>
     </widget>
    </item>
   </layout>
  </widget>
  <resources>
+  <include location="resources_rc.qrc"/>
   <include location="resources.qrc"/>
  </resources>
  <connections>

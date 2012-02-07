@@ -28,7 +28,7 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
 # Initialize Qt resources from file resources.py
-import resources
+import resources_rc
 # Import the code for the dialogs
 from SimpleSvgDialog import SimpleSvgDialog
 
