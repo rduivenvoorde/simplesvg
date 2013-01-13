@@ -24,9 +24,15 @@ def name():
 def description():
   return "Create simple SVG from current view, editable with Inkscape"
 def version():
-  return "Version 0.6"
+  return "Version 0.7"
+def author():
+    return "Richard Duivenvoorde"
+def email():
+    return "richard@duif.net"
+def category():
+  return "Web"
 def qgisMinimumVersion():
-  return "1.0"
+  return "1.5"
 def classFactory(iface):
   # load SimpleSvg class from file SimpleSvg
   from SimpleSvg import SimpleSvg

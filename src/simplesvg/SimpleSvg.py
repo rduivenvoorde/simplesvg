@@ -79,7 +79,7 @@ SVG_TYPE_SHAPE = 2
 # http://www.carto.net/papers/svg/samples/symbol.shtml
 
 class SimpleSvg:
-  
+
   MSG_BOX_TITLE = "QGIS SimpleSvg Plugin "
 
   def __init__(self, iface):
@@ -98,8 +98,6 @@ class SimpleSvg:
 
     # Add toolbar button and menu item
     self.iface.addToolBarIcon(self.action)
-    self.iface.addPluginToMenu("&Save as SVG", self.action)
-
     self.dlg = SimpleSvgDialog(self.iface)
     QObject.connect(self.dlg, SIGNAL("showHelp()"), self.showHelp)
 
@@ -107,14 +105,20 @@ class SimpleSvg:
     self.aboutAction = QAction(QIcon(":/plugins/simplesvg/help.png"), \
                           "About", self.iface.mainWindow())
     self.aboutAction.setWhatsThis("SimpleSvg Plugin About")
-    self.iface.addPluginToMenu("&Save as SVG", self.aboutAction)
     QObject.connect(self.aboutAction, SIGNAL("activated()"), self.about)
     # help
     self.helpAction = QAction(QIcon(":/plugins/simplesvg/help.png"), \
                           "Help", self.iface.mainWindow())
     self.helpAction.setWhatsThis("SimpleSvg Plugin Help")
-    self.iface.addPluginToMenu("&Save as SVG", self.helpAction)
     QObject.connect(self.helpAction, SIGNAL("activated()"), self.showHelp)
+    if hasattr ( self.iface, "addPluginToWebMenu" ):
+        self.iface.addPluginToWebMenu("&Save as SVG", self.action)
+        self.iface.addPluginToWebMenu("&Save as SVG", self.aboutAction)
+        self.iface.addPluginToWebMenu("&Save as SVG", self.helpAction)
+    else:
+        self.iface.addPluginToMenu("&Save as SVG", self.action)
+        self.iface.addPluginToMenu("&Save as SVG", self.aboutAction)
+        self.iface.addPluginToMenu("&Save as SVG", self.helpAction)
 
   def showHelp(self):
     docFile = os.path.join(os.path.dirname(__file__), "docs","index.html")
@@ -130,9 +134,15 @@ class SimpleSvg:
 
   def unload(self):
     # Remove the plugin menu item and icon
-    self.iface.removePluginMenu("&Save as SVG",self.action)
-    self.iface.removePluginMenu("&Save as SVG",self.helpAction)
-    self.iface.removePluginMenu("&Save as SVG",self.aboutAction)
+    if hasattr ( self.iface, "addPluginToWebMenu" ):
+        self.iface.removePluginWebMenu("&Save as SVG",self.action)
+        self.iface.removePluginWebMenu("&Save as SVG",self.helpAction)
+        self.iface.removePluginWebMenu("&Save as SVG",self.aboutAction)
+    else:
+        self.iface.removePluginMenu("&Save as SVG",self.action)
+        self.iface.removePluginMenu("&Save as SVG",self.helpAction)
+        self.iface.removePluginMenu("&Save as SVG",self.aboutAction)
+
     self.iface.removeToolBarIcon(self.action)
 
     QObject.disconnect(self.aboutAction, SIGNAL("activated()"), self.about)

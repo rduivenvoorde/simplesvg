@@ -2,14 +2,15 @@
 [general]
 name:SimpleSvg
 qgisMinimumVersion:1.5
-description:TODO
-version:0.6
+description:Create simple SVG from current view, editable with Inkscape
+version:0.7
 ; end of mandatory metadata
 
 
 ; start of optional metadata
 
 changelog:
+    0.7     (01-2013): changes needed for QGIS 2.0 api, move to web menu
     0.6     (02-2012): addition of On The Fly Projection, new dialogs, addition of mapResizer(dialog), fixes in Unique Value Classification
     0.5     (08-2011): fix for wrong path for raster layer, individual g-element grouped by symbol, first steps to making it possible to use New Symbology ("singleSymbol", "categorizedSymbol", "graduatedSymbol"), label-color used now
     0.4     (06-2011): IF qgis has (had) a label, use that field as inkscape:label for easy find/recognition of element; fix for unicode/utf-8 errors (problems with labels and filename with non-ascii characters; fix for bug with non-visible layers; cleanup of code and svg; viewport is now mapcanvas size
@@ -18,9 +19,17 @@ changelog:
     0.1     (0?-20??): initial version, for internal use
 
 
+category=Web
+
+author=Richard Duivenvoorde
+email=richard@duif.net
+
 homepage:http://hub.qgis.org/projects/simplesvg
+
 repository:http://hub.qgis.org/projects/simplesvg/repository
+
 tracker:http://hub.qgis.org/projects/simplesvg/issues
+
 icon:icon.png
 
 
