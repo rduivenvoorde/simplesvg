@@ -201,25 +201,30 @@ class SimpleSvg:
   def writeVectorLayer(self, layer, labels=False):
     # in case of 'on the fly projection' 
     # AND 
-    # different srs's for mapCanvas/project and layer we have to reproject stuff
-    destinationSrs = self.iface.mapCanvas().mapRenderer().destinationSrs()
-    #print 'destination srs: %s:' % destinationSrs.toProj4()
-    layerSrs = layer.srs()
-    #print 'layer srs:       %s:' % layerSrs.toProj4()
+    # different crs's for mapCanvas/project and layer we have to reproject stuff
+    if hasattr(self.iface.mapCanvas().mapRenderer(), "destinationSrs"):
+        # QGIS < 2.0
+        destinationCrs = self.iface.mapCanvas().mapRenderer().destinationSrs()
+        layerCrs = layer.srs()
+    else:
+        destinationCrs = self.iface.mapCanvas().mapRenderer().destinationCrs()
+        layerCrs = layer.crs()
+    #print 'destination crs: %s:' % destinationCrs.toProj4()
+    #print 'layer crs:       %s:' % layerCrs.toProj4()
     mapCanvasExtent = self.iface.mapCanvas().extent()
-    doSrsTransform = False
-    if not destinationSrs == layerSrs:
-      # we have to transform the mapCanvasExtent to the data/layer Srs to be able
+    doCrsTransform = False
+    if not destinationCrs == layerCrs:
+      # we have to transform the mapCanvasExtent to the data/layer Crs to be able
       # to retrieve the features from the data provider
       # but ONLY if we are working with on the fly projection
       # (because in that case we just 'fly' to the raw coordinates from data)
       if self.iface.mapCanvas().hasCrsTransformEnabled():
-        srsTransform = QgsCoordinateTransform(destinationSrs, layerSrs)
-        mapCanvasExtent = srsTransform.transformBoundingBox(mapCanvasExtent)
+        crsTransform = QgsCoordinateTransform(destinationCrs, layerCrs)
+        mapCanvasExtent = crsTransform.transformBoundingBox(mapCanvasExtent)
         # we have to have a transformer to do the transformation of the geometries
-        # to the mapcanvas srs ourselves:
-        srsTransform = QgsCoordinateTransform(layerSrs, destinationSrs)
-        doSrsTransform = True
+        # to the mapcanvas crs ourselves:
+        crsTransform = QgsCoordinateTransform(layerCrs, destinationCrs)
+        doCrsTransform = True
 
     # select features within current extent,
     #   with  ALL attributes, WITHIN currentExtent, WITH geom, AND using Intersect instead of bbox
@@ -246,10 +251,15 @@ class SimpleSvg:
       feature = QgsFeature(f)
 
       geom = feature.geometry()
-      layerSrs = layer.srs()
-      if doSrsTransform:
+      if hasattr(layer, "srs"):
+        # QGIS < 2.0
+        layerCrs = layer.srs()
+      else:
+        layerCrs = layer.crs()
+
+      if doCrsTransform:
         if hasattr(geom, "transform"):
-          geom.transform(srsTransform)
+          geom.transform(crsTransform)
         else:
           QMessageBox.warning(self.iface.mainWindow(), self.MSG_BOX_TITLE, ("Cannot crs-transform geometry in your QGIS version ...\n" "Only QGIS version 1.5 and above can transform geometries on the fly\n" "As a workaround, you can try to save the layer in the destination crs (eg as shapefile) and reload that layer...\n"), QMessageBox.Ok, QMessageBox.Ok)
           break
@@ -296,9 +306,9 @@ class SimpleSvg:
           if labels:
             geom = feature.geometry().centroid()
             # centroid-method returns a NON-transformed centroid
-            if doSrsTransform:
+            if doCrsTransform:
               if hasattr(geom, "transform"):
-                geom.transform(srsTransform)
+                geom.transform(crsTransform)
               else:
                 QMessageBox.warning(self.iface.mainWindow(), self.MSG_BOX_TITLE, ("Cannot crs-transform geometry in your QGIS version ...\n" "Only QGIS version 1.5 and above can transform geometries on the fly\n" "As a workaround, you can try to save the layer in the destination crs (eg as shapefile) and reload that layer...\n"), QMessageBox.Ok, QMessageBox.Ok)
                 break
