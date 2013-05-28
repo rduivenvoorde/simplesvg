@@ -206,7 +206,7 @@ class SimpleSvg:
     return svg
 
   def isRendererV2(self, layer):
-    return (layer.type()==0 and hasattr(layer, 'isUsingRendererV2') and layer.isUsingRendererV2()) or (layer.type()==0 and ('rendererV2' in dir(layer)))
+    return (layer.type()==0 and hasattr(layer, 'isUsingRendererV2') and layer.isUsingRendererV2()) or (layer.type()==0 and not hasattr(layer, 'isUsingRendererV2') and ('rendererV2' in dir(layer)))
 
   def writeVectorLayer(self, layer, labels=False):
     # in case of 'on the fly projection' 
@@ -241,18 +241,18 @@ class SimpleSvg:
     # we are going to group all features by their symbol so in svg we can group them in a <g> tag with the symbol style
     if self.isRendererV2(layer):
       if hasattr(layer, 'isUsingRendererV2'):
-        # For QGis 1.8 API
+        # For QGis 1.8 API, new symbology
         provider = layer.dataProvider();
         provider.select(provider.attributeIndexes(), mapCanvasExtent, True, True)
       else:
-        # For cleaned-up 2.0 API
+        # For QGis 2.0 cleaned-up API
         provider = layer.getFeatures( QgsFeatureRequest().setFilterRect(mapCanvasExtent))
       renderer = layer.rendererV2()
       if str(renderer.type()) not in ("singleSymbol", "categorizedSymbol", "graduatedSymbol"):
         QMessageBox.information(self.iface.mainWindow(), "Warning", "New Symbology layer found for layer '"+layer.name()+"'\n\nThis layer uses a Renderer/Style which cannot be used with this plugin.\n\nThis layer will be ignored in export.")
         return ""
     else:
-      # For old symbology
+      # For QGis <= 1.8 API, old symbology
       provider = layer.dataProvider();
       provider.select(provider.attributeIndexes(), mapCanvasExtent, True, True)
       renderer = layer.renderer()
