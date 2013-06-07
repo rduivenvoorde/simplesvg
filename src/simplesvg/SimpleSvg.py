@@ -382,9 +382,8 @@ class SimpleSvg:
         sym['stroke'] = u'rgb(%s)' % (fill[:fill.rfind(',')])
       # points have fill and stroke
       sym['fill'] = u'rgb(%s)' % (fill[:fill.rfind(',')])
-    #else:
-    #  sym['fill'] = u'none'
-    if geom.wkbType() == QGis.WKBLineString or geom.wkbType() == QGis.WKBMultiLineString:
+    # if feature is line OR when there is no brush: set fill to none
+    if geom.wkbType() == QGis.WKBLineString or geom.wkbType() == QGis.WKBMultiLineString or slprops[QString(u'style')] == 'no':
       sym['fill'] = u'none'
     # pen: in QT pen can be 0
     if slprops.has_key(QString(u'width_border')):
