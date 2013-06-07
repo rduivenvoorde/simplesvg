@@ -206,7 +206,7 @@ class SimpleSvg:
     return svg
 
   def isRendererV2(self, layer):
-    return layer.type()==0 and hasattr(layer, 'isUsingRendererV2') and layer.isUsingRendererV2()
+    return (layer.type()==0 and hasattr(layer, 'isUsingRendererV2') and layer.isUsingRendererV2()) or (layer.type()==0 and not hasattr(layer, 'isUsingRendererV2') and ('rendererV2' in dir(layer)))
 
   def writeVectorLayer(self, layer, labels=False):
     # in case of 'on the fly projection' 
@@ -238,15 +238,24 @@ class SimpleSvg:
 
     # select features within current extent,
     #   with  ALL attributes, WITHIN currentExtent, WITH geom, AND using Intersect instead of bbox
-    provider = layer.dataProvider();
-    provider.select(provider.attributeIndexes(), mapCanvasExtent, True, True)
     # we are going to group all features by their symbol so in svg we can group them in a <g> tag with the symbol style
-    renderer = layer.renderer()
     if self.isRendererV2(layer):
+      if hasattr(layer, 'isUsingRendererV2'):
+        # For QGis 1.8 API, new symbology
+        provider = layer.dataProvider();
+        provider.select(provider.attributeIndexes(), mapCanvasExtent, True, True)
+      else:
+        # For QGis 2.0 cleaned-up API
+        provider = layer.getFeatures( QgsFeatureRequest().setFilterRect(mapCanvasExtent))
       renderer = layer.rendererV2()
       if str(renderer.type()) not in ("singleSymbol", "categorizedSymbol", "graduatedSymbol"):
         QMessageBox.information(self.iface.mainWindow(), "Warning", "New Symbology layer found for layer '"+layer.name()+"'\n\nThis layer uses a Renderer/Style which cannot be used with this plugin.\n\nThis layer will be ignored in export.")
         return ""
+    else:
+      # For QGis <= 1.8 API, old symbology
+      provider = layer.dataProvider();
+      provider.select(provider.attributeIndexes(), mapCanvasExtent, True, True)
+      renderer = layer.renderer()
     symbols = renderer.symbols()
     symbolFeatureMap = dict.fromkeys(symbols, [])
     id=self.sanitizeStr(unicode(layer.name()).lower())
