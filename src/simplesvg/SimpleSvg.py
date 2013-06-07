@@ -88,6 +88,10 @@ class SimpleSvg:
     self.svgFilename = "/home/richard/temp/svgtest.svg"
     self.svgType = SVG_TYPE_PATH
     self.strokeLineJoin = 'round' # miter, round, bevel
+    # normal usage: current scale, only the features which touch current mapcanvas
+    # if setting this false, ALL features will be taken from the dataprovider
+    # and rendered as vectors, NOTE: not working for raster layers !
+    self.featuresInMapcanvasOnly = True
 
   def initGui(self):
       # Create action that will start plugin configuration
@@ -219,9 +223,12 @@ class SimpleSvg:
     else:
         destinationCrs = self.iface.mapCanvas().mapRenderer().destinationCrs()
         layerCrs = layer.crs()
+    if self.featuresInMapcanvasOnly:
+        mapCanvasExtent = self.iface.mapCanvas().extent()
+    else:
+        mapCanvasExtent = layer.extent()
     #print 'destination crs: %s:' % destinationCrs.toProj4()
     #print 'layer crs:       %s:' % layerCrs.toProj4()
-    mapCanvasExtent = self.iface.mapCanvas().extent()
     doCrsTransform = False
     if not destinationCrs == layerCrs:
       # we have to transform the mapCanvasExtent to the data/layer Crs to be able
@@ -229,8 +236,12 @@ class SimpleSvg:
       # but ONLY if we are working with on the fly projection
       # (because in that case we just 'fly' to the raw coordinates from data)
       if self.iface.mapCanvas().hasCrsTransformEnabled():
-        crsTransform = QgsCoordinateTransform(destinationCrs, layerCrs)
-        mapCanvasExtent = crsTransform.transformBoundingBox(mapCanvasExtent)
+        # only if we have 'on te fly transformation' enabled
+        #    AND the mapCanvasExtent is the real mapcanvas extent (note: if we
+        # are going to write ALL features, then mapCanvasExtent is actually the layer extent)
+        if self.featuresInMapcanvasOnly:
+          crsTransform = QgsCoordinateTransform(destinationCrs, layerCrs)
+          mapCanvasExtent = crsTransform.transformBoundingBox(mapCanvasExtent)
         # we have to have a transformer to do the transformation of the geometries
         # to the mapcanvas crs ourselves:
         crsTransform = QgsCoordinateTransform(layerCrs, destinationCrs)
@@ -570,7 +581,7 @@ class SimpleSvg:
     insideExtent = False
     coordCount = 0
     for point in line:
-      if self.extentAsPoly.contains(point):
+      if self.extentAsPoly.contains(point) or not self.featuresInMapcanvasOnly:
         insideExtent = True
       pixpoint =  self.w2p(point.x(), point.y(), self.iface.mapCanvas().mapUnitsPerPixel(), currentExtent.xMinimum(), currentExtent.yMaximum())
       #print pixpoint
@@ -615,7 +626,7 @@ class SimpleSvg:
       insideExtent = False
       coordCount = 0
       for point in ring:
-          if self.extentAsPoly.contains(point):
+          if self.extentAsPoly.contains(point) or not self.featuresInMapcanvasOnly:
               insideExtent = True
           pixpoint =  self.w2p(point.x(), point.y(), self.iface.mapCanvas().mapUnitsPerPixel(), currentExtent.xMinimum(), currentExtent.yMaximum())
           if lastPixel<>pixpoint:
