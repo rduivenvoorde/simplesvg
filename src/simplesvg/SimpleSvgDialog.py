@@ -44,8 +44,8 @@ class SimpleSvgDialog(QDialog):
     fileName = QFileDialog.getSaveFileName(self, "/home/richard/temp/svgtest.svg", "/home/richard/temp", "")
     # TODO do some checks to be sure there is no extension
     self.ui.txtFileName.setText(fileName)
-  @pyqtSignature("on_btnResizeMap_clicked()")
 
+  @pyqtSignature("on_btnResizeMap_clicked()")
   # show resize dialog (while hiding yourself, come back when resize dialog is closed
   def on_btnResizeMap_clicked(self):
     self.sizer.show()
@@ -53,6 +53,10 @@ class SimpleSvgDialog(QDialog):
 
   def on_buttonBox_helpRequested(self):
     self.emit(SIGNAL("showHelp()") )
+
+  def on_cbFeaturesInMapcanvasOnly_stateChanged(self):
+    print "CHANGE"
+    self.emit(SIGNAL("cbFeaturesInMapcanvasOnlyChanged"), self.ui.cbFeaturesInMapcanvasOnly.isChecked())
 
   def getFilePath(self):
     return self.ui.txtFileName.text()

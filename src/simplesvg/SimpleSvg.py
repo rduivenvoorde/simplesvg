@@ -104,6 +104,7 @@ class SimpleSvg:
     self.iface.addToolBarIcon(self.action)
     self.dlg = SimpleSvgDialog(self.iface)
     QObject.connect(self.dlg, SIGNAL("showHelp()"), self.showHelp)
+    QObject.connect(self.dlg, SIGNAL("cbFeaturesInMapcanvasOnlyChanged"), self.setFeaturesInMapcanvasOnly)
 
     # about
     self.aboutAction = QAction(QIcon(":/plugins/simplesvg/help.png"), \
@@ -123,6 +124,11 @@ class SimpleSvg:
         self.iface.addPluginToMenu("&Save as SVG", self.action)
         self.iface.addPluginToMenu("&Save as SVG", self.aboutAction)
         self.iface.addPluginToMenu("&Save as SVG", self.helpAction)
+
+  def setFeaturesInMapcanvasOnly(self, checked):
+    if not checked:
+        QMessageBox.information(self.dlg, "Warning", "Be carefull: unchecking this, means QGIS is going to fetch ALL objects from your data.\nHandle with care for big datasets.")
+    self.featuresInMapcanvasOnly = checked
 
   def showHelp(self):
     docFile = os.path.join(os.path.dirname(__file__), "docs","index.html")

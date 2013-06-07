@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="/plugins/simplesvg">
+    <file>help.png</file>
+    <file>inkscape.png</file>
+    <file>icon.png</file>
+  </qresource>
+</RCC>

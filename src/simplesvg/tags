@@ -1,0 +1,57 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+ImageMapPlugin	oudesvg.py	/^class ImageMapPlugin:$/;"	c
+MSG_BOX_TITLE	oudesvg.py	/^  MSG_BOX_TITLE = "QGis Image Map Plugin"$/;"	v	class:ImageMapPlugin
+RESOURCE_FILES	Makefile	/^RESOURCE_FILES = resources.py$/;"	m
+SVG_TYPE_PATH	SimpleSvg.py	/^SVG_TYPE_PATH = 1$/;"	v
+SVG_TYPE_SHAPE	SimpleSvg.py	/^SVG_TYPE_SHAPE = 2$/;"	v
+SimpleSvg	SimpleSvg.py	/^class SimpleSvg:$/;"	c
+SimpleSvgDialog	SimpleSvgDialog.py	/^class SimpleSvgDialog(QDialog):$/;"	c
+UI_FILES	Makefile	/^UI_FILES = Ui_SimpleSvg.py$/;"	m
+Ui_SimpleSvg	Ui_SimpleSvg.py	/^class Ui_SimpleSvg(object):$/;"	c
+__init__	SimpleSvg.py	/^  def __init__(self, iface):$/;"	m	class:SimpleSvg
+__init__	SimpleSvgDialog.py	/^  def __init__(self): $/;"	m	class:SimpleSvgDialog
+__init__	oudesvg.py	/^  def __init__(self, iface):$/;"	m	class:ImageMapPlugin
+_fromUtf8	Ui_SimpleSvg.py	/^    _fromUtf8 = QtCore.QString.fromUtf8$/;"	v
+_fromUtf8	Ui_SimpleSvg.py	/^    _fromUtf8 = lambda s: s$/;"	v
+classFactory	__init__.py	/^def classFactory(iface):$/;"	f
+description	__init__.py	/^def description():$/;"	f
+getFilePath	SimpleSvgDialog.py	/^  def getFilePath(self):$/;"	m	class:SimpleSvgDialog
+go	oudesvg.py	/^  def go(self, foo):$/;"	m	class:ImageMapPlugin
+initGui	SimpleSvg.py	/^  def initGui(self):  $/;"	m	class:SimpleSvg
+initGui	oudesvg.py	/^  def initGui(self):$/;"	m	class:ImageMapPlugin
+isRendererV2	SimpleSvg.py	/^  def isRendererV2(self, layer):$/;"	m	class:SimpleSvg
+label2svg	SimpleSvg.py	/^  def label2svg(self, feature, fid, symbol, labelTxt):$/;"	m	class:SimpleSvg
+line2svg	SimpleSvg.py	/^  def line2svg(self, feature, line, currentExtent):$/;"	m	class:SimpleSvg
+name	__init__.py	/^def name():$/;"	f
+on_btnBrowse_clicked	SimpleSvgDialog.py	/^  def on_btnBrowse_clicked(self):$/;"	m	class:SimpleSvgDialog
+point2svg	SimpleSvg.py	/^  def point2svg(self, feature, currentExtent):$/;"	m	class:SimpleSvg
+polygon2svg	SimpleSvg.py	/^  def polygon2svg(self, feature, polygon, currentExtent):$/;"	m	class:SimpleSvg
+qCleanupResources	resources.py	/^def qCleanupResources():$/;"	f
+qInitResources	resources.py	/^def qInitResources():$/;"	f
+qgisMinimumVersion	__init__.py	/^def qgisMinimumVersion():$/;"	f
+qt_resource_data	resources.py	/^"$/;"	v
+qt_resource_name	resources.py	/^"$/;"	v
+qt_resource_struct	resources.py	/^"$/;"	v
+retranslateUi	Ui_SimpleSvg.py	/^    def retranslateUi(self, SimpleSvg):$/;"	m	class:Ui_SimpleSvg
+run	SimpleSvg.py	/^  def run(self):$/;"	m	class:SimpleSvg
+run	oudesvg.py	/^  def run(self):$/;"	m	class:ImageMapPlugin
+sanitizeStr	SimpleSvg.py	/^  def sanitizeStr(self, string):$/;"	m	class:SimpleSvg
+setupUi	Ui_SimpleSvg.py	/^    def setupUi(self, SimpleSvg):$/;"	m	class:Ui_SimpleSvg
+symbol	SimpleSvg.py	/^  def symbol(self, feature, symbol):$/;"	m	class:SimpleSvg
+symbolForFeature	SimpleSvg.py	/^  def symbolForFeature(self, layer, feature):$/;"	m	class:SimpleSvg
+symbolV2	SimpleSvg.py	/^  def symbolV2(self, feature, symbol):$/;"	m	class:SimpleSvg
+unload	SimpleSvg.py	/^  def unload(self):$/;"	m	class:SimpleSvg
+unload	oudesvg.py	/^  def unload(self):$/;"	m	class:ImageMapPlugin
+version	__init__.py	/^def version():$/;"	f
+w2p	SimpleSvg.py	/^  def w2p(self, x, y, mupp, minx, maxy):$/;"	m	class:SimpleSvg
+writeExtent	SimpleSvg.py	/^  def writeExtent(self):$/;"	m	class:SimpleSvg
+writeFeature	SimpleSvg.py	/^  def writeFeature(self, feature, fid, labelTxt):$/;"	m	class:SimpleSvg
+writeRaster	SimpleSvg.py	/^  def writeRaster(self, layer):$/;"	m	class:SimpleSvg
+writeSVG	SimpleSvg.py	/^  def writeSVG(self):$/;"	m	class:SimpleSvg
+writeVectorLayer	SimpleSvg.py	/^  def writeVectorLayer(self, layer, labels=False):$/;"	m	class:SimpleSvg
+writeXml	oudesvg.py	/^  def writeXml(self):$/;"	m	class:ImageMapPlugin

@@ -5,16 +5,24 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:svg="http://www.w3.org/2000/svg">
     <body>
-        <h1>Simple SVG Qgis Plugin</h1>
+        <h1>Simple SVG Qgis Plugin, 0.8</h1>
         <p>
         SimpleSvg is a plugin which tries to save current map as SVG. Other then the normal SaveAsSVG in the composer, this plugin tries to keep the GIS-grouping intact:
         layers in Qgis will be layers in Inkscape, symbol classes will be groups. Objects will have ids with the layername in it, so the id's kan be used of a search in 
         the xml-view of Inkscape.
         </p>
         <p>
-        At  the moment it can only work with 'Old Symbology' both vector- and raster layers. A raster layer  will be saved as image and included as an image element
+        The plugin uses the screen coordinates (pixel values) to set the svg coordinates.
+        Before version 0.8 the plugin picked only the features that were at least touching the current map view.
+        Since 0.8 there is a checkbox, which UNchecked will make the plugin just fetch ALL vector objects from all layers.
+        This means that for example you can load all countries of the world, zoom in to the netherlands (aka set a sort of 'resolution' for the coordinates) and 
+        then let the generate svg (at that scale) for all data in the data set.
+        Be carefull though: fetching ALL data from big dataset can give other problems.
+        </p>
+        <p>
+        It can work with 'Old Symbology' and partially with 'New Symbology' both for vector- and raster layers. A raster layer  will be saved as image and included as an image element
         with an external (to the file next to the svg).<br/>
-        The plugin wil NOT work with layers which have 'on the fly' projection enabled.
+        The plugin wil also work with layers which have 'on the fly' projection enabled.
         </p>
         <p>
         For lines and polygons it tries to save both pen and symbol style, most classifications are working.<br/>
@@ -57,6 +65,9 @@
 
     <p>
     <ul>
+        
+        <li>0.8 (01-2013): checkbox to just retrieve ALL features (meaning you actuall set a resolution for svg); more changes needed for QGIS 2.0 api (thanks Hien TRAN-QUANG) </li>
+
         <li>0.7 (01-2013): changes needed for QGIS 2.0 api, move to web menu</li>
 
         <li>0.6 (02-2012): addition of On The Fly Projection, new dialogs, addition of mapResizer(dialog), fixes in Unique Value Classification</li>
