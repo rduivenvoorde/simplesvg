@@ -135,12 +135,17 @@ class SimpleSvg:
     QDesktopServices.openUrl( QUrl("file:" + docFile) )
 
   def about(self):
-    infoString = QString("Written by Richard Duivenvoorde\nEmail - richard@duif.net\n")
-    infoString = infoString.append("Company - http://www.webmapper.net\n")
-    infoString = infoString.append("Source: http://hub.qgis.org/projects/simplesvg/")
+    try:
+        infoString = QString("Written by Richard Duivenvoorde\nEmail - richard@duif.net\n")
+        infoString = infoString.append("Company - http://www.webmapper.net\n")
+        infoString = infoString.append("Source: http://hub.qgis.org/projects/simplesvg/")
+        
+    except NameError:
+        infoString = "Written by Richard Duivenvoorde\nEmail - richard@duif.net\n"
+        infoString += "Company - http://www.webmapper.net\n"
+        infoString += "Source: http://hub.qgis.org/projects/simplesvg/"
     QMessageBox.information(self.iface.mainWindow(), \
               "SimpleSvg Plugin About", infoString)
-
 
   def unload(self):
     # Remove the plugin menu item and icon
@@ -217,6 +222,9 @@ class SimpleSvg:
 
   def isRendererV2(self, layer):
     return (layer.type()==0 and hasattr(layer, 'isUsingRendererV2') and layer.isUsingRendererV2()) or (layer.type()==0 and not hasattr(layer, 'isUsingRendererV2') and ('rendererV2' in dir(layer)))
+
+  def isRendererV2SIP2(self, layer):
+    return (layer.type()==0 and not hasattr(layer, 'isUsingRendererV2') and ('rendererV2' in dir(layer)))
 
   def writeVectorLayer(self, layer, labels=False):
     # in case of 'on the fly projection' 
@@ -385,7 +393,18 @@ class SimpleSvg:
     #  {PyQt4.QtCore.QString(u'color_border'): PyQt4.QtCore.QString(u'0,0,0,255'), PyQt4.QtCore.QString(u'offset'): PyQt4.QtCore.QString(u'0,0'), PyQt4.QtCore.QString(u'size'): PyQt4.QtCore.QString(u'2'), PyQt4.QtCore.QString(u'color'): PyQt4.QtCore.QString(u'255,0,0,255'), PyQt4.QtCore.QString(u'name'): PyQt4.QtCore.QString(u'circle'), PyQt4.QtCore.QString(u'angle'): PyQt4.QtCore.QString(u'0')}
     # lines have          : color / offset / penstyle / width / use_custom_dash / joinstyle / customdash / capstyle:
     #  {PyQt4.QtCore.QString(u'color'): PyQt4.QtCore.QString(u'255,255,0,255'), PyQt4.QtCore.QString(u'offset'): PyQt4.QtCore.QString(u'0'), PyQt4.QtCore.QString(u'penstyle'): PyQt4.QtCore.QString(u'solid'), PyQt4.QtCore.QString(u'width'): PyQt4.QtCore.QString(u'0.5'), PyQt4.QtCore.QString(u'use_custom_dash'): PyQt4.QtCore.QString(u'0'), PyQt4.QtCore.QString(u'joinstyle'): PyQt4.QtCore.QString(u'bevel'), PyQt4.QtCore.QString(u'customdash'): PyQt4.QtCore.QString(u'5;2'), PyQt4.QtCore.QString(u'capstyle'): PyQt4.QtCore.QString(u'square')}
-    strokekey = QString(u'color_border')
+    try:
+        strokekey = QString(u'color_border')
+        colorkey = QString(u'color')
+        stylekey = QString(u'style')
+        width_borderkey = QString(u'width_border')
+        widthkey = QString(u'width')
+    except NameError:
+        strokekey = u'color_border'
+        colorkey = u'color'
+        stylekey = u'style'
+        width_borderkey = u'width_border'
+        widthkey = u'width'
     if slprops.has_key(strokekey):
       stroke = unicode(slprops[strokekey])
       sym['stroke'] = u'rgb(%s)' % (stroke[:stroke.rfind(',')])
@@ -393,20 +412,20 @@ class SimpleSvg:
       sym['stroke'] = u'none'
     # fill color: only non line features have fill color, lines have 'none'
     geom = feature.geometry()
-    if slprops.has_key(QString(u'color')):
-      fill = unicode(slprops[QString(u'color')])
+    if slprops.has_key(colorkey):
+      fill = unicode(slprops[colorkey])
       if geom.wkbType() == QGis.WKBLineString or geom.wkbType() == QGis.WKBMultiLineString:
         sym['stroke'] = u'rgb(%s)' % (fill[:fill.rfind(',')])
       # points have fill and stroke
       sym['fill'] = u'rgb(%s)' % (fill[:fill.rfind(',')])
     # if feature is line OR when there is no brush: set fill to none
-    if geom.wkbType() == QGis.WKBLineString or geom.wkbType() == QGis.WKBMultiLineString or slprops[QString(u'style')] == 'no':
+    if geom.wkbType() == QGis.WKBLineString or geom.wkbType() == QGis.WKBMultiLineString or (slprops.has_key(stylekey) and slprops[stylekey] == 'no'):
       sym['fill'] = u'none'
     # pen: in QT pen can be 0
-    if slprops.has_key(QString(u'width_border')):
-      sym['stroke-width'] = unicode(slprops[QString(u'width_border')])
-    elif slprops.has_key(QString(u'width')):
-      sym['stroke-width'] = unicode(slprops[QString(u'width')])
+    if slprops.has_key(width_borderkey):
+      sym['stroke-width'] = unicode(slprops[width_borderkey])
+    elif slprops.has_key(widthkey):
+      sym['stroke-width'] = unicode(slprops[widthkey])
     else:
       sym['stroke-width'] = u'0.26'
     #print sym
@@ -441,7 +460,10 @@ class SimpleSvg:
         legend.setLayerVisible(lyr, False)
     lyrName = unicode(layer.name())
     imgName = lyrName+'.png'
-    imgPath= self.svgFilename[:self.svgFilename.lastIndexOf('/')+1]
+    try:
+        imgPath= self.svgFilename[:self.svgFilename.lastIndexOf('/')+1]
+    except NameError:
+        imgPath= self.svgFilename[:self.svgFilename.rfind('/')+1]
     # save image next to svg but put it in Image tag only the local filename
     self.iface.mapCanvas().saveAsImage(imgPath+imgName)
     # <image y="-7.7685061" x="27.115078" id="image3890" xlink:href="nl.png" />
