@@ -2,6 +2,7 @@
 [general]
 name:SimpleSvg
 qgisMinimumVersion:1.5
+qgisMaximumVersion:2.99
 description:Create simple SVG from current view, editable with Inkscape
 version:0.8
 ; end of mandatory metadata
