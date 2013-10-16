@@ -461,7 +461,7 @@ class SimpleSvg:
     lyrName = unicode(layer.name())
     imgName = lyrName+'.png'
     try:
-        imgPath= self.svgFilename[:self.svgFilename.lastIndexOf('/')+1]
+        imgPath= self.svgFilename[:self.svgFilename.rfind('/')+1]
     except NameError:
         imgPath= self.svgFilename[:self.svgFilename.rfind('/')+1]
     # save image next to svg but put it in Image tag only the local filename

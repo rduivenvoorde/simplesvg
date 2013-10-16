@@ -24,7 +24,7 @@ def name():
 def description():
   return "Create simple SVG from current view, editable with Inkscape"
 def version():
-  return "Version 0.8.1"
+  return "Version 0.8.2"
 def author():
     return "Richard Duivenvoorde"
 def email():
