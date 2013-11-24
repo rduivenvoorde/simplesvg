@@ -138,12 +138,12 @@ class SimpleSvg:
     try:
         infoString = QString("Written by Richard Duivenvoorde\nEmail - richard@duif.net\n")
         infoString = infoString.append("Company - http://www.webmapper.net\n")
-        infoString = infoString.append("Source: http://hub.qgis.org/projects/simplesvg/")
+        infoString = infoString.append("Source: http://github.com/rduivenvoorde/simplesvg/")
         
     except NameError:
         infoString = "Written by Richard Duivenvoorde\nEmail - richard@duif.net\n"
         infoString += "Company - http://www.webmapper.net\n"
-        infoString += "Source: http://hub.qgis.org/projects/simplesvg/"
+        infoString += "Source: http://github.com/rduivenvoorde/simplesvg/"
     QMessageBox.information(self.iface.mainWindow(), \
               "SimpleSvg Plugin About", infoString)
 

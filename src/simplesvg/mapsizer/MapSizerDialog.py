@@ -32,7 +32,7 @@ from Ui_MapSizer import Ui_MapSizer
 class MapSizerDialog(QDialog):
 
     MSG_BOX_TITLE = "QGis"
-    LINUX_OFFSET = 2
+    LINUX_OFFSET = 0
     WINDOWS_OFFSET = 4
 
     def __init__(self, parent, mapCanvas):
@@ -77,8 +77,8 @@ class MapSizerDialog(QDialog):
         self.parent.show()
 
     def setMapCanvasExtent(self):
-        print 'SET EXTENT'
-        self.mapCanvas.setExtent(QgsRectangle(self.ui.txtMinX.text().toFloat()[0], self.ui.txtMinY.text().toFloat()[0], self.ui.txtMaxX.text().toFloat()[0], self.ui.txtMaxY.text().toFloat()[0]))
+        #print 'SET EXTENT'
+        self.mapCanvas.setExtent(QgsRectangle(float(self.ui.txtMinX.text()), float(self.ui.txtMinY.text()), float(self.ui.txtMaxX.text()), float(self.ui.txtMaxY.text())))
         self.mapCanvas.refresh()
 
     def mapCanvasResize(self):
@@ -91,7 +91,7 @@ class MapSizerDialog(QDialog):
         self.ui.txtMaxY.setText('%.6f'%(extent.yMaximum()))
 
     def setMapCanvasSize(self, newWidth, newHeight):
-        parent=self.mapCanvas.parentWidget()
+        parent=self.mapCanvas.parentWidget().parentWidget()
         mapCanvas=self.mapCanvas
         # some QT magic for me, coming from maximized force a minimal layout change first
         if(parent.isMaximized()):
