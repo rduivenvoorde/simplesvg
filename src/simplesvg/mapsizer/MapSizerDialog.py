@@ -91,7 +91,12 @@ class MapSizerDialog(QDialog):
         self.ui.txtMaxY.setText('%.6f'%(extent.yMaximum()))
 
     def setMapCanvasSize(self, newWidth, newHeight):
-        parent=self.mapCanvas.parentWidget().parentWidget()
+        if QGis.QGIS_VERSION_INT < 10900:
+            # on QGIS 1.8 the parent of mapCanvas == QMainWindow
+            parent=self.mapCanvas.parentWidget()
+        else:
+            # on QGIS>2.0 there is another widget in between
+            parent=self.mapCanvas.parentWidget().parentWidget()
         mapCanvas=self.mapCanvas
         # some QT magic for me, coming from maximized force a minimal layout change first
         if(parent.isMaximized()):

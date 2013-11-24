@@ -4,13 +4,14 @@ name:SimpleSvg
 qgisMinimumVersion:1.5
 qgisMaximumVersion:2.99
 description:Create simple SVG from current view, editable with Inkscape
-version:0.8.2
+version:0.8.3
 ; end of mandatory metadata
 
 
 ; start of optional metadata
 
 changelog:
+    0.8.3   (11-2013): fix with maprezing, thanks Christoph König, plus some other bugfixes
     0.8.2   (10-2013): fix for bug when saving raster
     0.8.1   (06-2013): work of Hien Tran-Quang, make it work for sip2 and QGIS2
     0.8     (06-2013): checkbox to just retrieve ALL features (meaning you actuall set a resolution for svg); more changes needed for QGIS 2.0 api (thanks Hien TRAN-QUANG)

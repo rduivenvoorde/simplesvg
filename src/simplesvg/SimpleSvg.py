@@ -104,6 +104,7 @@ class SimpleSvg:
     self.iface.addToolBarIcon(self.action)
     self.dlg = SimpleSvgDialog(self.iface)
     QObject.connect(self.dlg, SIGNAL("showHelp()"), self.showHelp)
+    QObject.connect(self.dlg, SIGNAL("accepted()"), self.writeToFile)
     QObject.connect(self.dlg, SIGNAL("cbFeaturesInMapcanvasOnlyChanged"), self.setFeaturesInMapcanvasOnly)
 
     # about
@@ -134,12 +135,23 @@ class SimpleSvg:
     docFile = os.path.join(os.path.dirname(__file__), "docs","index.html")
     QDesktopServices.openUrl( QUrl("file:" + docFile) )
 
+  def writeToFile(self):
+      self.svgFilename = self.dlg.getFilePath()
+      output = self.writeSVG()
+      file = open(self.svgFilename, "w")
+      #print output
+      for line in output:
+          #print '%s - %s' % (type(line),line)
+          file.write(line.encode('utf-8'))
+      file.close()
+      QMessageBox.information(self.iface.mainWindow(), \
+              "SimpleSvg Plugin", "Finished writing to svg")
+
   def about(self):
     try:
         infoString = QString("Written by Richard Duivenvoorde\nEmail - richard@duif.net\n")
         infoString = infoString.append("Company - http://www.webmapper.net\n")
         infoString = infoString.append("Source: http://github.com/rduivenvoorde/simplesvg/")
-        
     except NameError:
         infoString = "Written by Richard Duivenvoorde\nEmail - richard@duif.net\n"
         infoString += "Company - http://www.webmapper.net\n"
@@ -167,15 +179,6 @@ class SimpleSvg:
   # run method that performs all the real work
   def run(self):
     self.dlg.show()
-    if self.dlg.exec_() == QDialog.Accepted:
-      self.svgFilename = self.dlg.getFilePath()
-      output = self.writeSVG()
-      file = open(self.svgFilename, "w")
-      #print output
-      for line in output:
-          #print '%s - %s' % (type(line),line)
-          file.write(line.encode('utf-8'))
-      file.close()
 
   def writeSVG(self):
     # determine extent for later use (only write geoms that are at least partially contained)
