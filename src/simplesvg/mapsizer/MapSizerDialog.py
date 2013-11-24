@@ -33,7 +33,7 @@ class MapSizerDialog(QDialog):
 
     MSG_BOX_TITLE = "QGis"
     LINUX_OFFSET = 0
-    WINDOWS_OFFSET = 4
+    WINDOWS_OFFSET = 0
 
     def __init__(self, parent, mapCanvas):
         QDialog.__init__(self)

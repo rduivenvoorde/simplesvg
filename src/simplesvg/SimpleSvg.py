@@ -137,6 +137,8 @@ class SimpleSvg:
 
   def writeToFile(self):
       self.svgFilename = self.dlg.getFilePath()
+      # save this filename in settings for later
+      QSettings().setValue('/simplesvg/lastfile', self.svgFilename)
       output = self.writeSVG()
       file = open(self.svgFilename, "w")
       #print output
@@ -175,6 +177,7 @@ class SimpleSvg:
     QObject.disconnect(self.aboutAction, SIGNAL("activated()"), self.about)
     QObject.disconnect(self.helpAction, SIGNAL("activated()"), self.showHelp)
     QObject.disconnect(self.action, SIGNAL("activated()"), self.run)
+    QObject.disconnect(self.dlg, SIGNAL("accepted()"), self.writeToFile)
 
   # run method that performs all the real work
   def run(self):
