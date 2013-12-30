@@ -326,7 +326,7 @@ class SimpleSvg:
         else:
             symbolFeatureMap.update({symbol:[feature]})
       else:
-        if len(symbolFeatureMap[symbol])==0:
+        if not symbol in symbolFeatureMap or len(symbolFeatureMap[symbol])==0:
           symbolFeatureMap[symbol]=[feature]
         else:
           symbolFeatureMap[symbol].append(feature)
