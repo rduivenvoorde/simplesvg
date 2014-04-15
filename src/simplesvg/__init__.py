@@ -22,9 +22,9 @@ email                : richard@duif.net
 def name():
   return "SimpleSvg"
 def description():
-  return "Create simple SVG from current view, editable with Inkscape"
+  return "Create simple SVG from current view, editable with Inkscape, and keeping the layers and names usable in Inkscape"
 def version():
-  return "Version 0.8.4"
+  return "Version 0.8.5"
 def author():
     return "Richard Duivenvoorde"
 def email():
@@ -32,7 +32,7 @@ def email():
 def category():
   return "Web"
 def qgisMinimumVersion():
-  return "1.5"
+  return "2.0"
 def classFactory(iface):
   # load SimpleSvg class from file SimpleSvg
   from SimpleSvg import SimpleSvg

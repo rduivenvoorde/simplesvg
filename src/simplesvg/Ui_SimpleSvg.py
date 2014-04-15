@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'Ui_SimpleSvg.ui'
 #
-# Created: Fri Jun  7 16:16:35 2013
-#      by: PyQt4 UI code generator 4.10.1
+# Created: Tue Apr 15 21:33:34 2014
+#      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -47,6 +47,7 @@ class Ui_SimpleSvg(object):
         self.btnResizeMap.setObjectName(_fromUtf8("btnResizeMap"))
         self.gridLayout.addWidget(self.btnResizeMap, 2, 2, 1, 2)
         self.txtFileName = QtGui.QLineEdit(SimpleSvg)
+        self.txtFileName.setText(_fromUtf8(""))
         self.txtFileName.setObjectName(_fromUtf8("txtFileName"))
         self.gridLayout.addWidget(self.txtFileName, 4, 2, 1, 1)
         self.btnBrowse = QtGui.QPushButton(SimpleSvg)
@@ -85,12 +86,11 @@ class Ui_SimpleSvg(object):
         SimpleSvg.setWindowTitle(_translate("SimpleSvg", "SimpleSvg", None))
         self.txtHeading.setText(_translate("SimpleSvg", "SimpleSvg Plugin", None))
         self.btnResizeMap.setText(_translate("SimpleSvg", "Resize Map or Set Extent", None))
-        self.txtFileName.setText(_translate("SimpleSvg", "/home/richard/temp/svgtest.svg", None))
         self.btnBrowse.setText(_translate("SimpleSvg", "Browse", None))
         self.textEdit.setHtml(_translate("SimpleSvg", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Arial\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
+"</style></head><body style=\" font-family:\'Cantarell\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Sans Serif\'; font-size:10pt; font-weight:600;\">SimpleSvg is a plugin which tries to save the current map as SVG.</span></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'Sans Serif\'; font-size:10pt;\"><br /></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Sans Serif\'; font-size:10pt;\">It tries to use plain svg, only adding some inkscape specific attributes to make it possible to use \'layers\' in inkscape, and grouping svg-elements in a \'QGIS\'-way: </span></p>\n"

@@ -69,3 +69,6 @@ class SimpleSvgDialog(QDialog):
   def getFilePath(self):
     return self.ui.txtFileName.text()
 
+  def setFilePath(self, path):
+    return self.ui.txtFileName.setText(path)
+

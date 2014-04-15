@@ -85,7 +85,7 @@ class SimpleSvg:
   def __init__(self, iface):
     # Save reference to the QGIS interface
     self.iface = iface
-    self.svgFilename = "/home/richard/temp/svgtest.svg"
+    self.svgFilename = QSettings().value('/simplesvg/lastfile', '')
     self.svgType = SVG_TYPE_PATH
     self.strokeLineJoin = 'round' # miter, round, bevel
     # normal usage: current scale, only the features which touch current mapcanvas
@@ -103,6 +103,7 @@ class SimpleSvg:
     # Add toolbar button and menu item
     self.iface.addToolBarIcon(self.action)
     self.dlg = SimpleSvgDialog(self.iface)
+    self.dlg.setFilePath(self.svgFilename)
     QObject.connect(self.dlg, SIGNAL("showHelp()"), self.showHelp)
     QObject.connect(self.dlg, SIGNAL("accepted()"), self.writeToFile)
     QObject.connect(self.dlg, SIGNAL("cbFeaturesInMapcanvasOnlyChanged"), self.setFeaturesInMapcanvasOnly)
@@ -216,13 +217,15 @@ class SimpleSvg:
     # now layers with labels
     for i in range (self.iface.mapCanvas().layerCount()-1, -1, -1):
         layer = self.iface.mapCanvas().layer(i)
-        if layer.type()==0 and layer.hasLabelsEnabled(): # only vectors have labels
+        if layer.type()==0: # vector
+          lblSettings = QgsPalLayerSettings()
+          lblSettings.readFromLayer( layer )
+        #TODO: fix this if layer.type()==0 and layer.hasLabelsEnabled(): # only vectors have labels
+        if layer.type()==0 and lblSettings.enabled: # only vectors have labels
           svg.extend(self.writeVectorLayer(layer, True))
 
     # qgis extent, usable for clipping in Inkscape
     svg.extend(self.writeExtent())
-
-    #svg.append("</g>\n</svg>")
     svg.append(u'</svg>')
     return svg
 
@@ -266,6 +269,9 @@ class SimpleSvg:
         # to the mapcanvas crs ourselves:
         crsTransform = QgsCoordinateTransform(layerCrs, destinationCrs)
         doCrsTransform = True
+
+    lblSettings = QgsPalLayerSettings()
+    lblSettings.readFromLayer( layer )
 
     # select features within current extent,
     #   with  ALL attributes, WITHIN currentExtent, WITH geom, AND using Intersect instead of bbox
@@ -342,15 +348,28 @@ class SimpleSvg:
           sym = self.symbol(feature, symbol)
         # start of symbol g-element, holds colors and stroke etc
         if not labels:
-          svg.append(u'<g stroke="' + sym['stroke'] + '" fill="' + sym['fill'] + '" stroke-linejoin="' + self.strokeLineJoin + '" stroke-width="' + sym['stroke-width'] +'">\n')
-        else:  # labels all black for now...
-          lc = layer.label().labelAttributes().color()
-          lblColor = u'rgb(%s,%s,%s)' % (lc.red(), lc.green(), lc.blue())
+          fill = ''
+          if sym.has_key('fill'):
+            fill = 'fill="' + sym['fill'] + '"'
+          svg.append(u'<g stroke="' + sym['stroke'] + '" '+ fill + ' stroke-linejoin="' + self.strokeLineJoin + '" stroke-width="' + sym['stroke-width'] +'">\n')
+        else:
+          # TODO fix this
+          if False:
+            lc = layer.label().labelAttributes().color()
+            lblColor = u'rgb(%s,%s,%s)' % (lc.red(), lc.green(), lc.blue())
+          else:  # labels all black for now...
+            lblColor = u'rgb(0,0,0)'
           svg.append(u'<g stroke="none" fill="'+lblColor+'">\n')
         for feature in symbolFeatureMap[symbol]:
           i=i+1
           # labeltxt is used both for the real labels, AND for the inkscape-label attributes of g and txt elements
-          labeltxt = self.sanitizeStr(layer.label().fieldValue(0, feature)) # only first field for now.
+          # TODO fix this
+          if lblSettings.enabled:
+            labeltxt = self.sanitizeStr(feature[lblSettings.fieldName])
+          else:
+            #labeltxt = self.sanitizeStr(layer.label().fieldValue(0, feature)) # only first field for now.
+            #labeltxt = self.sanitizeStr(unicode(feature.fields().field(0)))
+            labeltxt = self.sanitizeStr('')
           if not labels:
             svg.extend(self.writeFeature(feature, id+str(i), labeltxt))
           if labels:
