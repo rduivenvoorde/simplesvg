@@ -6,7 +6,7 @@ Create simple SVG from current view, editable with InkScape
                              -------------------
 begin                : 2011-06-16
 copyright            : (C) 2011 by Richard Duivenvoorde
-email                : richard@duif.net 
+email                : richard@duif.net
  ***************************************************************************/
 
 /***************************************************************************
@@ -24,7 +24,7 @@ BUGS:
 
 import os.path
 # Import the PyQt and QGIS libraries
-from PyQt4.QtCore import * 
+from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
 # Initialize Qt resources from file resources.py
@@ -71,7 +71,7 @@ SVG_TYPE_SHAPE = 2
 #   ]]>
 #  </style>
 # </defs>
-  
+
 # short notation
 # <path class="fil0 str6" d="M113 1084c2,9 14,23 4,29 -10,5 -28,-14 -39,-9 -11,5 -8,21 -12,31"/>
 
@@ -211,7 +211,7 @@ class SimpleSvg:
         elif layer.type()==1: # raster
           svg.extend(self.writeRaster(layer))
         # layers like OpenLayers/OpenStreetmap/Google are plugin layer: write as raster for now
-        elif layer.type()==2: # plugin layer 
+        elif layer.type()==2: # plugin layer
           svg.extend(self.writeRaster(layer))
 
     # now layers with labels
@@ -236,8 +236,8 @@ class SimpleSvg:
     return (layer.type()==0 and not hasattr(layer, 'isUsingRendererV2') and ('rendererV2' in dir(layer)))
 
   def writeVectorLayer(self, layer, labels=False):
-    # in case of 'on the fly projection' 
-    # AND 
+    # in case of 'on the fly projection'
+    # AND
     # different crs's for mapCanvas/project and layer we have to reproject stuff
     if hasattr(self.iface.mapCanvas().mapRenderer(), "destinationSrs"):
         # QGIS < 2.0
@@ -343,7 +343,7 @@ class SimpleSvg:
       #print "2 symbols holds %s symbols" % len(symbols)
       for symbol in symbols:
         if self.isRendererV2(layer):
-          sym = self.symbolV2(feature, symbol)
+          sym = self.symbolV2(feature, symbol, layer)
         else:
           sym = self.symbol(feature, symbol)
         # start of symbol g-element, holds colors and stroke etc
@@ -365,7 +365,10 @@ class SimpleSvg:
           # labeltxt is used both for the real labels, AND for the inkscape-label attributes of g and txt elements
           # TODO fix this
           if lblSettings.enabled:
-            labeltxt = self.sanitizeStr(feature[lblSettings.fieldName])
+              try:
+                  labeltxt = self.sanitizeStr(feature[lblSettings.fieldName])
+              except:
+                  labeltxt = self.sanitizeStr('')
           else:
             #labeltxt = self.sanitizeStr(layer.label().fieldValue(0, feature)) # only first field for now.
             #labeltxt = self.sanitizeStr(unicode(feature.fields().field(0)))
@@ -376,11 +379,14 @@ class SimpleSvg:
             geom = feature.geometry().centroid()
             # centroid-method returns a NON-transformed centroid
             if doCrsTransform:
-              if hasattr(geom, "transform"):
-                geom.transform(crsTransform)
-              else:
-                QMessageBox.warning(self.iface.mainWindow(), self.MSG_BOX_TITLE, ("Cannot crs-transform geometry in your QGIS version ...\n" "Only QGIS version 1.5 and above can transform geometries on the fly\n" "As a workaround, you can try to save the layer in the destination crs (eg as shapefile) and reload that layer...\n"), QMessageBox.Ok, QMessageBox.Ok)
-                break
+                try:
+                  if hasattr(geom, "transform"):
+                    geom.transform(crsTransform)
+                  else:
+                    QMessageBox.warning(self.iface.mainWindow(), self.MSG_BOX_TITLE, ("Cannot crs-transform geometry in your QGIS version ...\n" "Only QGIS version 1.5 and above can transform geometries on the fly\n" "As a workaround, you can try to save the layer in the destination crs (eg as shapefile) and reload that layer...\n"), QMessageBox.Ok, QMessageBox.Ok)
+                    break
+                except:
+                    pass
             svg.extend(self.label2svg(geom.asPoint(), id+str(i), self.symbolForFeature(layer, feature), labeltxt))
         svg.append(u'</g>\n'); # end of symbol
     svg.append(u'</g>\n'); # end of layer
@@ -404,13 +410,15 @@ class SimpleSvg:
       sym['stroke-width'] = unicode(symbol.pen().width())
     return sym
 
-  def symbolV2(self, feature, symbol):
-    #print '##### symbol: %s, symbollayercount: %s' % (symbol, symbol.symbolLayerCount())
+  def symbolV2(self, feature, symbol, layer):
+    # print '##### symbol: %s, symbollayercount: %s' % (symbol, symbol.symbolLayerCount())
     sym={}
     if symbol.symbolLayerCount() > 1:
-      #layer is undefined in this scope, so this messagebox produces an error
-      #QMessageBox.information(self.iface.mainWindow(), "Warning", "Layer '"+layer.name()+"' uses New Symbology, and styles with more the one Symbol Layer, only the first one will be use.")
-      pass
+        try:
+            localname = layer.name()
+        except:
+            localname = "error"
+        QMessageBox.information(self.iface.mainWindow(), "Warning", "Layer '"+localname+"' uses New Symbology, and styles with more the one Symbol Layer, only the first one will be use.")
     sl = symbol.symbolLayer(0)
     slprops = sl.properties()
     #print "symbollayer properties: %s" % slprops
@@ -555,7 +563,7 @@ class SimpleSvg:
   def symbolForFeature(self, layer, feature):
     if self.isRendererV2(layer):
         return layer.rendererV2().symbolForFeature(feature)
-    else: 
+    else:
       # symbolForFeatures seems not to work for Old Symbology?? Do it ourselves:
       # OLD symbolisation:
       #   Graduated Symbol: every symbol has BOTH upper and lower bound/value
@@ -746,4 +754,3 @@ class SimpleSvg:
 #
 #    def renderSymbol(selfi, symbol):
 #        pass
-
