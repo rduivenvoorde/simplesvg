@@ -408,7 +408,9 @@ class SimpleSvg:
     #print '##### symbol: %s, symbollayercount: %s' % (symbol, symbol.symbolLayerCount())
     sym={}
     if symbol.symbolLayerCount() > 1:
-      QMessageBox.information(self.iface.mainWindow(), "Warning", "Layer '"+layer.name()+"' uses New Symbology, and styles with more the one Symbol Layer, only the first one will be use.")
+      #layer is undefined in this scope, so this messagebox produces an error
+      #QMessageBox.information(self.iface.mainWindow(), "Warning", "Layer '"+layer.name()+"' uses New Symbology, and styles with more the one Symbol Layer, only the first one will be use.")
+      pass
     sl = symbol.symbolLayer(0)
     slprops = sl.properties()
     #print "symbollayer properties: %s" % slprops
