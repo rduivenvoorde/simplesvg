@@ -18,6 +18,11 @@ email                : richard@duif.net
  *                                                                         *
  ***************************************************************************/
 
+GET STYLE INFO UI:
+import processing
+layer = iface.activeLayer()
+print layer.rendererV2().symbol().symbolLayers()[0].properties()
+
 BUGS:
 
 """
@@ -312,7 +317,6 @@ class SimpleSvg:
         layerCrs = layer.srs()
       else:
         layerCrs = layer.crs()
-
       if doCrsTransform:
         if hasattr(geom, "transform"):
           geom.transform(crsTransform)
@@ -337,6 +341,8 @@ class SimpleSvg:
         else:
           symbolFeatureMap[symbol].append(feature)
     # now iterate over symbols IF there are any features in this view from this layer
+    ####SET TRANSPARENCY (FROM LAYER LEVEL)
+    opacity = str((100-layer.layerTransparency())/100.0)
     if feature != None:
       id=id+'_'
       i=0
@@ -350,8 +356,12 @@ class SimpleSvg:
         if not labels:
           fill = ''
           if sym.has_key('fill'):
-            fill = 'fill="' + sym['fill'] + '"'
-          svg.append(u'<g stroke="' + sym['stroke'] + '" '+ fill + ' stroke-linejoin="' + self.strokeLineJoin + '" stroke-width="' + sym['stroke-width'] +'">\n')
+            #####fill = 'fill="' + sym['fill'] + '"' 
+            #fill = 'fill="' + sym['fill'] + '" ' + 'fill-opacity="' + sym['opacity'] + '"'
+            fill = 'fill="' + sym['fill'] + '" ' + 'fill-opacity="' + '%s' %(opacity) + '"'
+          #svg.append(u'<g stroke="' + sym['stroke'] + '" '+ fill + ' stroke-linejoin="' + self.strokeLineJoin + '" stroke-width="' + sym['stroke-width'] +'">\n')
+          #svg.append(u'<g stroke="' + sym['stroke'] + '" '+ fill + ' stroke-linejoin="' + self.strokeLineJoin + '" stroke-width="' + sym['stroke-width'] + '" stroke-opacity="' + sym['opacity'] +'">\n')
+          svg.append(u'<g stroke="' + sym['stroke'] + '" '+ fill + ' stroke-linejoin="' + self.strokeLineJoin + '" stroke-width="' + sym['stroke-width'] + '" stroke-opacity="' + '%s' %(opacity) +'">\n')
         else:
           # TODO fix this
           if False:
@@ -419,38 +429,50 @@ class SimpleSvg:
     # lines have          : color / offset / penstyle / width / use_custom_dash / joinstyle / customdash / capstyle:
     #  {PyQt4.QtCore.QString(u'color'): PyQt4.QtCore.QString(u'255,255,0,255'), PyQt4.QtCore.QString(u'offset'): PyQt4.QtCore.QString(u'0'), PyQt4.QtCore.QString(u'penstyle'): PyQt4.QtCore.QString(u'solid'), PyQt4.QtCore.QString(u'width'): PyQt4.QtCore.QString(u'0.5'), PyQt4.QtCore.QString(u'use_custom_dash'): PyQt4.QtCore.QString(u'0'), PyQt4.QtCore.QString(u'joinstyle'): PyQt4.QtCore.QString(u'bevel'), PyQt4.QtCore.QString(u'customdash'): PyQt4.QtCore.QString(u'5;2'), PyQt4.QtCore.QString(u'capstyle'): PyQt4.QtCore.QString(u'square')}
     try:
-        strokekey = QString(u'color_border')
+        strokekey = QString(u'outline_color')#QString(u'color_border')
         colorkey = QString(u'color')
         stylekey = QString(u'style')
-        width_borderkey = QString(u'width_border')
-        widthkey = QString(u'width')
+        width_borderkey = QString(u'outline_width')#QString(u'width_border')
+        widthkey = QString(u'outline_width')#QString(u'width')
+
+        linecolorkey = QString(u'line_color')
+        linewidthkey = QString(u'line_width')
     except NameError:
-        strokekey = u'color_border'
+        strokekey = u'outline_color'#u'color_border'
         colorkey = u'color'
         stylekey = u'style'
-        width_borderkey = u'width_border'
-        widthkey = u'width'
+        width_borderkey = u'outline_width'#u'width_border'
+        widthkey = u'outline_width'#u'width'
+
+        linecolorkey = u'line_color'#u'color_border'
+        linewidthkey = u'line_width'#u'color_border'
     if slprops.has_key(strokekey):
       stroke = unicode(slprops[strokekey])
       sym['stroke'] = u'rgb(%s)' % (stroke[:stroke.rfind(',')])
+      if str(stroke.rsplit(',')[3]) == "0":  #IF TRANSPARENCY IS 0 then set colour to null
+        sym['stroke'] = u'none'
     else:
       sym['stroke'] = u'none'
     # fill color: only non line features have fill color, lines have 'none'
     geom = feature.geometry()
     if slprops.has_key(colorkey):
       fill = unicode(slprops[colorkey])
-      if geom.wkbType() == QGis.WKBLineString or geom.wkbType() == QGis.WKBMultiLineString:
+      if geom.wkbType() == QGis.WKBLineString or geom.wkbType() == QGis.WKBMultiLineString:        
         sym['stroke'] = u'rgb(%s)' % (fill[:fill.rfind(',')])
       # points have fill and stroke
       sym['fill'] = u'rgb(%s)' % (fill[:fill.rfind(',')])
+      if str(fill.rsplit(',')[3]) == "0":  #IF TRANSPARENCY IS 0 then set colour to null
+        sym['fill'] = u'none'
+
     # if feature is line OR when there is no brush: set fill to none
     if geom.wkbType() == QGis.WKBLineString or geom.wkbType() == QGis.WKBMultiLineString or (slprops.has_key(stylekey) and slprops[stylekey] == 'no'):
-      sym['fill'] = u'none'
+      sym['fill'] = u'none'      
+      if slprops.has_key(linecolorkey):
+        stroke = unicode(slprops[linecolorkey])        
+        sym['stroke'] = u'rgb(%s)' % (stroke[:stroke.rfind(',')])
     # pen: in QT pen can be 0
-    if slprops.has_key(width_borderkey):
-      sym['stroke-width'] = unicode(slprops[width_borderkey])
-    elif slprops.has_key(widthkey):
-      sym['stroke-width'] = unicode(slprops[widthkey])
+    if slprops.has_key(linewidthkey):
+      sym['stroke-width'] = unicode(slprops[linewidthkey])
     else:
       sym['stroke-width'] = u'0.26'
     #print sym
@@ -711,7 +733,9 @@ class SimpleSvg:
   def w2p(self, x, y, mupp, minx, maxy):
     pixX = (x - minx)/mupp
     pixY = (y - maxy)/mupp
-    return [int(pixX), int(-pixY)]
+    ####return [int(pixX), int(-pixY)]
+    # ABOVE (convert to int) WAS RESULTING IN DIFFERENT RELATIVE POISITON OF PIXELS DEPENDING ON VIEW EXTENT
+    return [pixX, -pixY]
 
 
 
