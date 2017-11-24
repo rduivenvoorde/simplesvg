@@ -44,9 +44,9 @@ class SimpleSvgDialog(QDialog):
   def on_btnBrowse_clicked(self):
     if QGis.QGIS_VERSION_INT < 10900:
         # qgis <= 1.8
-        fileName = unicode(QSettings().value('/simplesvg/lastfile').toString(), '')
+        fileName = unicode(QSettings().value('/simplesvg/lastfile').toString())
     else:
-        fileName = QSettings().value('/simplesvg/lastfile'), ''  # already unicode
+        fileName = QSettings().value('/simplesvg/lastfile')  # already unicode
     fileName = QFileDialog.getSaveFileName(self, "Save as svg file", fileName, '')
     # TODO do some checks to be sure there is no extension
     self.ui.txtFileName.setText(fileName)
