@@ -518,7 +518,7 @@ class SimpleSvg:
 
   def sanitizeStr(self, string):
     # TODO: find the right way to do this
-    return string.replace(' ','_').replace('/','_').replace(',','_').replace('.','_')
+    return unicode(string).replace(' ','_').replace('/','_').replace(',','_').replace('.','_')
 
   def writeFeature(self, feature, fid, labelTxt):
     svg = []
