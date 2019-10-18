@@ -24,13 +24,14 @@ BUGS:
 
 import os.path
 # Import the PyQt and QGIS libraries
-from PyQt4.QtCore import * 
-from PyQt4.QtGui import *
+from qgis.PyQt.QtCore import *
+from qgis.PyQt.QtGui import *
+from qgis.PyQt.QtWidgets import QAction
 from qgis.core import *
 # Initialize Qt resources from file resources.py
-import resources_rc
+#import resources_rc
 # Import the code for the dialogs
-from SimpleSvgDialog import SimpleSvgDialog
+from .SimpleSvgDialog import SimpleSvgDialog
 
 SVG_TYPE_PATH = 1
 SVG_TYPE_SHAPE = 2
@@ -98,27 +99,32 @@ class SimpleSvg:
     self.action = QAction(QIcon(":/plugins/simplesvg/icon.png"), \
             "Save as SVG", self.iface.mainWindow())
     # connect the action to the run method
-    QObject.connect(self.action, SIGNAL("activated()"), self.run)
+    self.action.triggered.connect(self.run)
 
     # Add toolbar button and menu item
     self.iface.addToolBarIcon(self.action)
     self.dlg = SimpleSvgDialog(self.iface)
     self.dlg.setFilePath(self.svgFilename)
-    QObject.connect(self.dlg, SIGNAL("showHelp()"), self.showHelp)
-    QObject.connect(self.dlg, SIGNAL("accepted()"), self.writeToFile)
-    QObject.connect(self.dlg, SIGNAL("cbFeaturesInMapcanvasOnlyChanged"), self.setFeaturesInMapcanvasOnly)
+    # TODO
+    #QObject.connect(self.dlg, SIGNAL("showHelp()"), self.showHelp)
+    #QObject.connect(self.dlg, SIGNAL("accepted()"), self.writeToFile)
+    self.dlg.accepted.connect(self.writeToFile)
+    #TODO
+    #QObject.connect(self.dlg, SIGNAL("cbFeaturesInMapcanvasOnlyChanged"), self.setFeaturesInMapcanvasOnly)
 
     # about
     self.aboutAction = QAction(QIcon(":/plugins/simplesvg/help.png"), \
                           "About", self.iface.mainWindow())
     self.aboutAction.setWhatsThis("SimpleSvg Plugin About")
-    QObject.connect(self.aboutAction, SIGNAL("activated()"), self.about)
+    #QObject.connect(self.aboutAction, SIGNAL("activated()"), self.about)
+    self.aboutAction.triggered.connect(self.about)
     # help
     self.helpAction = QAction(QIcon(":/plugins/simplesvg/help.png"), \
                           "Help", self.iface.mainWindow())
     self.helpAction.setWhatsThis("SimpleSvg Plugin Help")
-    QObject.connect(self.helpAction, SIGNAL("activated()"), self.showHelp)
-    if hasattr ( self.iface, "addPluginToWebMenu" ):
+    #QObject.connect(self.helpAction, SIGNAL("activated()"), self.showHelp)
+    self.helpAction.triggered.connect(self.showHelp)
+    if hasattr(self.iface, "addPluginToWebMenu" ):
         self.iface.addPluginToWebMenu("&Save as SVG", self.action)
         self.iface.addPluginToWebMenu("&Save as SVG", self.aboutAction)
         self.iface.addPluginToWebMenu("&Save as SVG", self.helpAction)
@@ -593,7 +599,7 @@ class SimpleSvg:
         # create new symbol and set RGB according to calculation in http://doc.qgis.org/head/qgscontinuouscolorrenderer_8cpp-source.html
         symbol = QgsSymbol(minSymbol) # copy
         value = (feature.attributeMap()[renderer.classificationAttributes()[0]]).toDouble()[0]  # we know Continuous Color only works with numeric attributes
-        if (maxValue - minValue) <> 0:
+        if (maxValue - minValue) != 0:
           red = int ( maxRed * ( value - minValue ) / ( maxValue - minValue ) + minRed * ( maxValue - value ) / ( maxValue - minValue ) )
           green = int ( maxGreen * ( value - minValue ) / ( maxValue - minValue ) + minGreen * ( maxValue - value ) / ( maxValue - minValue ) )
           blue =  int ( maxBlue * ( value - minValue ) / ( maxValue - minValue ) + minBlue * ( maxValue - value ) / ( maxValue - minValue ) )
@@ -651,7 +657,7 @@ class SimpleSvg:
         insideExtent = True
       pixpoint =  self.w2p(point.x(), point.y(), self.iface.mapCanvas().mapUnitsPerPixel(), currentExtent.xMinimum(), currentExtent.yMaximum())
       #print(pixpoint)
-      if lastPixel<>pixpoint:
+      if lastPixel != pixpoint:
         coordCount = coordCount +1
         if self.svgType==SVG_TYPE_PATH and coordCount>1:
           svg += 'L '
@@ -696,7 +702,7 @@ class SimpleSvg:
           if self.extentAsPoly.contains(point) or not self.featuresInMapcanvasOnly:
               insideExtent = True
           pixpoint =  self.w2p(point.x(), point.y(), self.iface.mapCanvas().mapUnitsPerPixel(), currentExtent.xMinimum(), currentExtent.yMaximum())
-          if lastPixel<>pixpoint:
+          if lastPixel != pixpoint:
             coordCount = coordCount +1
             if self.svgType==SVG_TYPE_PATH and coordCount>1:
               svg += 'L '

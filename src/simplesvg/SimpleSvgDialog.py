@@ -20,12 +20,12 @@ email                : richard@duif.net
 """
 
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from qgis.core import *
+from qgis.PyQt.QtCore import *
+from qgis.PyQt.QtGui import *
+from qgis.PyQt.QtWidgets import QDialog
 
-from Ui_SimpleSvg import Ui_SimpleSvg
-from mapsizer.MapSizerDialog import MapSizerDialog
+from .Ui_SimpleSvg import Ui_SimpleSvg
+from .mapsizer.MapSizerDialog import MapSizerDialog
 
 # create the dialog for SimpleSvg
 class SimpleSvgDialog(QDialog):
@@ -40,7 +40,7 @@ class SimpleSvgDialog(QDialog):
 
   # see http://www.riverbankcomputing.com/Docs/PyQt4/pyqt4ref.html#connecting-signals-and-slots
   # without this magic, the on_btnOk_clicked will be called two times: one clicked() and one clicked(bool checked)
-  @pyqtSignature("on_btnBrowse_clicked()")
+  #@pyqtSignature("on_btnBrowse_clicked()")
   def on_btnBrowse_clicked(self):
     if QGis.QGIS_VERSION_INT < 10900:
         # qgis <= 1.8
@@ -51,7 +51,7 @@ class SimpleSvgDialog(QDialog):
     # TODO do some checks to be sure there is no extension
     self.ui.txtFileName.setText(fileName)
 
-  @pyqtSignature("on_btnResizeMap_clicked()")
+  #@pyqtSignature("on_btnResizeMap_clicked()")
   # show resize dialog (while hiding yourself, come back when resize dialog is closed
   def on_btnResizeMap_clicked(self):
     self.sizer.show()
@@ -61,7 +61,7 @@ class SimpleSvgDialog(QDialog):
     self.emit(SIGNAL("showHelp()") )
 
   def on_cbFeaturesInMapcanvasOnly_stateChanged(self):
-    print "CHANGE"
+    #print("CHANGE")
     self.emit(SIGNAL("cbFeaturesInMapcanvasOnlyChanged"), self.ui.cbFeaturesInMapcanvasOnly.isChecked())
 
   def getFilePath(self):

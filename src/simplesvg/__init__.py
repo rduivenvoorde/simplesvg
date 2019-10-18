@@ -35,7 +35,7 @@ def qgisMinimumVersion():
   return "2.0"
 def classFactory(iface):
   # load SimpleSvg class from file SimpleSvg
-  from SimpleSvg import SimpleSvg
+  from .SimpleSvg import SimpleSvg
   return SimpleSvg(iface)
 
 

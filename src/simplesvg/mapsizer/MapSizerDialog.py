@@ -21,12 +21,13 @@ email                : richard@duif.net
 
 import platform
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from qgis.PyQt.QtCore import *
+from qgis.PyQt.QtGui import *
+from qgis.PyQt.QtWidgets import QDialog
 
 from qgis.core import *
 
-from Ui_MapSizer import Ui_MapSizer
+from .Ui_MapSizer import Ui_MapSizer
 
 # create the dialog for SimpleSvg
 class MapSizerDialog(QDialog):
@@ -56,13 +57,14 @@ class MapSizerDialog(QDialog):
         self.ui.txtMaxX.setText('%.6f'%(extent.xMaximum()))
         self.ui.txtMaxY.setText('%.6f'%(extent.yMaximum()))
 
-        QObject.connect(self.mapCanvas, SIGNAL("renderComplete(QPainter *)"), self.mapCanvasResize)
+        #QObject.connect(self.mapCanvas, SIGNAL("renderComplete(QPainter *)"), self.mapCanvasResize)
+        self.mapCanvas.renderComplete.connect(self.mapCanvasResize)
 
-    @pyqtSignature("on_btnSetImageSize_clicked()")
+    #@pyqtSignature("on_btnSetImageSize_clicked()")
     def on_btnSetImageSize_clicked(self):
         self.setMapCanvasSize(self.ui.spinBoxImageWidth.value(), self.ui.spinBoxImageHeight.value())
 
-    @pyqtSignature("on_btnSetExtent_clicked()")
+    #@pyqtSignature("on_btnSetExtent_clicked()")
     def on_btnSetExtent_clicked(self):
         self.setMapCanvasExtent()
 
@@ -111,7 +113,7 @@ class MapSizerDialog(QDialog):
         # HACK: there are cases where after maximizing and here demaximizing the size of the parent is not
         # in sync with the actual size, giving a small error in the size setting
         # we do the resizing again, this fixes this small error then ....
-        if newWidth <> mapCanvas.size().width() or newHeight <> mapCanvas.size().height():
+        if newWidth != mapCanvas.size().width() or newHeight != mapCanvas.size().height():
             diffWidth=mapCanvas.size().width()-newWidth
             diffHeight=mapCanvas.size().height()-newHeight
             mapCanvas.resize(newWidth, newHeight)
