@@ -4,8 +4,7 @@ name:SimpleSvg
 qgisMinimumVersion:2.0
 qgisMaximumVersion:2.99
 description:Create simple SVG from current view, editable with Inkscape
-about:Create simple SVG from current view, editable with Inkscape. Only for simple styling and data. In QGIS3 there is better support for SVG
-version:0.9.0
+about:Create simple SVG from current view, editable with Inkscape. Only for simple styling and data. In QGIS3 there is better support for SVGversion:0.9.0
 ; end of mandatory metadata
 
 
