@@ -305,7 +305,6 @@ class SimpleSvg:
     #print "1 symbols holds %s symbols" % len(symbols)
     while provider.nextFeature(f):
       feature = QgsFeature(f)
-
       geom = feature.geometry()
       if hasattr(layer, "srs"):
         # QGIS < 2.0
@@ -392,7 +391,7 @@ class SimpleSvg:
     sym['stroke'] = u'rgb(%s,%s,%s)' % (sc.red(), sc.green(), sc.blue())
     # fill color: only non line features have fill color, lines have 'none'
     geom = feature.geometry()
-    if geom.wkbType() == QGis.WKBLineString or geom.wkbType() == QGis.WKBMultiLineString:
+    if geom.wkbType() in (QGis.WKBLineString, QGis.WKBLineString25D, QGis.WKBMultiLineString, QGis.WKBMultiLineString25D):
       sym['fill'] = u'none'
     else:
       f = symbol.fillColor()
@@ -411,7 +410,7 @@ class SimpleSvg:
       QMessageBox.information(self.iface.mainWindow(), "Warning", "Layer '"+layer.name()+"' uses New Symbology, and styles with more the one Symbol Layer, only the first one will be use.")
     sl = symbol.symbolLayer(0)
     slprops = sl.properties()
-    #print "symbollayer properties: %s" % slprops
+    #print("symbollayer properties: %s" % slprops)
     # region/polgyons have: color_border / style_border / offset / style / color / width_border
     #  {PyQt4.QtCore.QString(u'color_border'): PyQt4.QtCore.QString(u'0,0,0,255'), PyQt4.QtCore.QString(u'style_border'): PyQt4.QtCore.QString(u'solid'), PyQt4.QtCore.QString(u'offset'): PyQt4.QtCore.QString(u'0,0'), PyQt4.QtCore.QString(u'style'): PyQt4.QtCore.QString(u'solid'), PyQt4.QtCore.QString(u'color'): PyQt4.QtCore.QString(u'0,0,255,255'), PyQt4.QtCore.QString(u'width_border'): PyQt4.QtCore.QString(u'0.26')}
     # markers/points have : color_border / offset / size / color / name / angle:
@@ -419,13 +418,15 @@ class SimpleSvg:
     # lines have          : color / offset / penstyle / width / use_custom_dash / joinstyle / customdash / capstyle:
     #  {PyQt4.QtCore.QString(u'color'): PyQt4.QtCore.QString(u'255,255,0,255'), PyQt4.QtCore.QString(u'offset'): PyQt4.QtCore.QString(u'0'), PyQt4.QtCore.QString(u'penstyle'): PyQt4.QtCore.QString(u'solid'), PyQt4.QtCore.QString(u'width'): PyQt4.QtCore.QString(u'0.5'), PyQt4.QtCore.QString(u'use_custom_dash'): PyQt4.QtCore.QString(u'0'), PyQt4.QtCore.QString(u'joinstyle'): PyQt4.QtCore.QString(u'bevel'), PyQt4.QtCore.QString(u'customdash'): PyQt4.QtCore.QString(u'5;2'), PyQt4.QtCore.QString(u'capstyle'): PyQt4.QtCore.QString(u'square')}
     try:
-        strokekey = QString(u'color_border')
+        strokekey = QString(u'line_color')
+        strokekey2 = QString(u'outline_color')
         colorkey = QString(u'color')
         stylekey = QString(u'style')
         width_borderkey = QString(u'width_border')
         widthkey = QString(u'width')
     except NameError:
-        strokekey = u'color_border'
+        strokekey = u'line_color'
+        strokekey2 = u'outline_color'
         colorkey = u'color'
         stylekey = u'style'
         width_borderkey = u'width_border'
@@ -433,18 +434,22 @@ class SimpleSvg:
     if slprops.has_key(strokekey):
       stroke = unicode(slprops[strokekey])
       sym['stroke'] = u'rgb(%s)' % (stroke[:stroke.rfind(',')])
+    elif slprops.has_key(strokekey2):
+      stroke = unicode(slprops[strokekey2])
+      sym['stroke'] = u'rgb(%s)' % (stroke[:stroke.rfind(',')])
     else:
       sym['stroke'] = u'none'
     # fill color: only non line features have fill color, lines have 'none'
     geom = feature.geometry()
     if slprops.has_key(colorkey):
       fill = unicode(slprops[colorkey])
-      if geom.wkbType() == QGis.WKBLineString or geom.wkbType() == QGis.WKBMultiLineString:
+      if geom.wkbType() in (QGis.WKBLineString, QGis.WKBLineString25D, QGis.WKBMultiLineString, QGis.WKBMultiLineString25D):
         sym['stroke'] = u'rgb(%s)' % (fill[:fill.rfind(',')])
       # points have fill and stroke
       sym['fill'] = u'rgb(%s)' % (fill[:fill.rfind(',')])
     # if feature is line OR when there is no brush: set fill to none
-    if geom.wkbType() == QGis.WKBLineString or geom.wkbType() == QGis.WKBMultiLineString or (slprops.has_key(stylekey) and slprops[stylekey] == 'no'):
+    if geom.wkbType() in (QGis.WKBLineString, QGis.WKBLineString25D, QGis.WKBMultiLineString, QGis.WKBMultiLineString25D) \
+            or (slprops.has_key(stylekey) and slprops[stylekey] == 'no'):
       sym['fill'] = u'none'
     # pen: in QT pen can be 0
     if slprops.has_key(width_borderkey):
@@ -452,7 +457,7 @@ class SimpleSvg:
     elif slprops.has_key(widthkey):
       sym['stroke-width'] = unicode(slprops[widthkey])
     else:
-      sym['stroke-width'] = u'0.26'
+      sym['stroke-width'] = u'0.40'
     #print sym
     return sym
 
@@ -524,28 +529,36 @@ class SimpleSvg:
     svg.append(u'<g id="' + fid + '" '+inkscapeLbl+'>\n')
     geom=feature.geometry()
     currentExtent=self.currentExtent
-    if geom.wkbType() == QGis.WKBPoint: # 1 = WKBPoint
-        svg.extend(self.point2svg(feature, currentExtent))
-    if geom.wkbType() == QGis.WKBPolygon: # 3 = WKBTYPE.WKBPolygon:
+    # https://qgis.org/api/2.18/classQGis.html#a8da456870e1caec209d8ba7502cceff7
+    #print(geom.wkbType(), QGis.WKBPoint, QGis.WKBPoint25D)
+    if geom.wkbType() in (QGis.WKBPoint, QGis.WKBPoint25D): # 1 = WKBPoint
+        point = geom.asPoint()
+        svg.extend(self.point2svg(point, currentExtent))
+    if geom.wkbType() in (QGis.WKBMultiPoint, QGis.WKBMultiPoint25D):
+        multipoint = geom.asMultiPoint()
+        for point in multipoint:
+          svg.extend(self.point2svg(point, currentExtent))
+    if geom.wkbType() in (QGis.WKBPolygon, QGis.WKBPolygon25D): # 3 = WKBTYPE.WKBPolygon:
         polygon = geom.asPolygon()  # returns a list
         svg.extend(self.polygon2svg(feature, polygon, currentExtent))
-    if geom.wkbType() == QGis.WKBMultiPolygon: # 6 = WKBTYPE.WKBMultiPolygon:
+    if geom.wkbType() in (QGis.WKBMultiPolygon,QGis.WKBMultiPolygon25D ): # 6 = WKBTYPE.WKBMultiPolygon:
         multipolygon = geom.asMultiPolygon() # returns a list
         for polygon in multipolygon:
           svg.extend(self.polygon2svg(feature, polygon, currentExtent))
-    if geom.wkbType() == QGis.WKBLineString: # 6 = WKBTYPE.WKBLineString:
+    if geom.wkbType() in (QGis.WKBLineString, QGis.WKBLineString25D): # 6 = WKBTYPE.WKBLineString:
         line = geom.asPolyline()  # returns a list of points
         svg.extend(self.line2svg(feature, line, currentExtent))
-    if geom.wkbType() == QGis.WKBMultiLineString: # 6 = WKBTYPE.WKBLineString:
+    if geom.wkbType() in (QGis.WKBMultiLineString, QGis.WKBMultiLineString25D): # 6 = WKBTYPE.WKBLineString:
         multiline = geom.asMultiPolyline()  # returns a list of points
         for line in multiline:
             svg.extend(self.line2svg(feature, line, currentExtent))
     svg.append(u'</g>\n');
     return svg
 
-  def point2svg(self, feature, currentExtent):
-    point = feature.geometry().asPoint()
+  def point2svg(self, point, currentExtent):
+    #point = feature.geometry().asPoint()
     xy =  self.w2p(point.x(), point.y(), self.iface.mapCanvas().mapUnitsPerPixel(), self.currentExtent.xMinimum(), self.currentExtent.yMaximum())
+    #print(point, xy, point.x(), point.y(), self.iface.mapCanvas().mapUnitsPerPixel(), self.currentExtent.xMinimum(), self.currentExtent.yMaximum())
     # TODO take current extent into account
     svg = ['<circle cx="'+unicode(xy[0])+'" cy="'+unicode(xy[1])+'" r="5" />']
     return svg
@@ -623,7 +636,7 @@ class SimpleSvg:
       return default
 
   def line2svg(self, feature, line, currentExtent):
-    #print "calling line2svg..."
+    #print("calling line2svg...")
     linesvg = []
     svg = u''
     if self.svgType == SVG_TYPE_PATH:
@@ -637,7 +650,7 @@ class SimpleSvg:
       if self.extentAsPoly.contains(point) or not self.featuresInMapcanvasOnly:
         insideExtent = True
       pixpoint =  self.w2p(point.x(), point.y(), self.iface.mapCanvas().mapUnitsPerPixel(), currentExtent.xMinimum(), currentExtent.yMaximum())
-      #print pixpoint
+      #print(pixpoint)
       if lastPixel<>pixpoint:
         coordCount = coordCount +1
         if self.svgType==SVG_TYPE_PATH and coordCount>1:
@@ -646,18 +659,19 @@ class SimpleSvg:
         lastPixel = pixpoint
     # if at least ONE pixel of this ring is in current view extent, return the area-string, otherwise return an empty string
     if not insideExtent:
-      #print "RING FULLY OUTSIDE EXTENT: %s " % ring
-      None
+      #print("SKIPPING: Ring fully outside extent...?")
+      pass
     else:
       # check if there are more then 2 coords: very small polygons on current map can have coordinates
       # which if rounded to pixels all come to the same pixel, resulting in just ONE x,y coordinate
       # we skip these
       if coordCount < 2:
-        #print "Line contains just one pixel coordinate pair: skipping"
-        None
+        #print("SKIPPING: Line contains just one pixel coordinate pair")
+        pass
       else:
         svg += '"/>\n'
         linesvg.append(svg)
+        #print(linesvg)
     return linesvg
 
   # SHAPE-svg
