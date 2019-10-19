@@ -22,7 +22,7 @@ email                : richard@duif.net
 
 from qgis.PyQt.QtCore import *
 from qgis.PyQt.QtGui import *
-from qgis.PyQt.QtWidgets import QDialog
+from qgis.PyQt.QtWidgets import QDialog, QFileDialog
 
 from .Ui_SimpleSvg import Ui_SimpleSvg
 from .mapsizer.MapSizerDialog import MapSizerDialog
@@ -36,18 +36,16 @@ class SimpleSvgDialog(QDialog):
     self.ui.setupUi(self)
     # little dialog for sizing map
     self.sizer = MapSizerDialog(self, iface.mapCanvas())
+    self.ui.btnBrowse.clicked.connect(self.btnBrowse_clicked)
 
 
   # see http://www.riverbankcomputing.com/Docs/PyQt4/pyqt4ref.html#connecting-signals-and-slots
   # without this magic, the on_btnOk_clicked will be called two times: one clicked() and one clicked(bool checked)
   #@pyqtSignature("on_btnBrowse_clicked()")
-  def on_btnBrowse_clicked(self):
-    if QGis.QGIS_VERSION_INT < 10900:
-        # qgis <= 1.8
-        fileName = unicode(QSettings().value('/simplesvg/lastfile').toString())
-    else:
-        fileName = QSettings().value('/simplesvg/lastfile')  # already unicode
-    fileName = QFileDialog.getSaveFileName(self, "Save as svg file", fileName, '')
+  @pyqtSlot()
+  def btnBrowse_clicked(self):
+    fileName = QSettings().value('/simplesvg/lastfile')  # already unicode
+    fileName, filter = QFileDialog.getSaveFileName(self, "Save as svg file", fileName, '')
     # TODO do some checks to be sure there is no extension
     self.ui.txtFileName.setText(fileName)
 

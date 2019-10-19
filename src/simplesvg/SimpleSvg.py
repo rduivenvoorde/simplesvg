@@ -26,7 +26,7 @@ import os.path
 # Import the PyQt and QGIS libraries
 from qgis.PyQt.QtCore import *
 from qgis.PyQt.QtGui import *
-from qgis.PyQt.QtWidgets import QAction
+from qgis.PyQt.QtWidgets import QAction, QMessageBox
 from qgis.core import *
 # Initialize Qt resources from file resources.py
 #import resources_rc
@@ -78,6 +78,12 @@ SVG_TYPE_SHAPE = 2
 
 # (point) symbols
 # http://www.carto.net/papers/svg/samples/symbol.shtml
+
+
+# pycharm debugging
+# COMMENT OUT BEFORE PACKAGING !!!
+import pydevd
+pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True, suspend=False)
 
 class SimpleSvg:
 
@@ -147,7 +153,7 @@ class SimpleSvg:
       # save this filename in settings for later
       QSettings().setValue('/simplesvg/lastfile', self.svgFilename)
       output = self.writeSVG()
-      file = open(self.svgFilename, "w")
+      file = open(self.svgFilename, "wb")
       #print output
       for line in output:
           #print '%s - %s' % (type(line),line)
@@ -157,14 +163,9 @@ class SimpleSvg:
               "SimpleSvg Plugin", "Finished writing to svg")
 
   def about(self):
-    try:
-        infoString = QString("Written by Richard Duivenvoorde\nEmail - richard@duif.net\n")
-        infoString = infoString.append("Company - http://www.webmapper.net\n")
-        infoString = infoString.append("Source: http://github.com/rduivenvoorde/simplesvg/")
-    except NameError:
-        infoString = "Written by Richard Duivenvoorde\nEmail - richard@duif.net\n"
-        infoString += "Company - http://www.webmapper.net\n"
-        infoString += "Source: http://github.com/rduivenvoorde/simplesvg/"
+    infoString = "Written by Richard Duivenvoorde\nEmail - richard@duif.net\n"
+    infoString += "Company - http://www.webmapper.net\n"
+    infoString += "Source: http://github.com/rduivenvoorde/simplesvg/"
     QMessageBox.information(self.iface.mainWindow(), \
               "SimpleSvg Plugin About", infoString)
 
@@ -181,10 +182,12 @@ class SimpleSvg:
 
     self.iface.removeToolBarIcon(self.action)
 
-    QObject.disconnect(self.aboutAction, SIGNAL("activated()"), self.about)
-    QObject.disconnect(self.helpAction, SIGNAL("activated()"), self.showHelp)
-    QObject.disconnect(self.action, SIGNAL("activated()"), self.run)
-    QObject.disconnect(self.dlg, SIGNAL("accepted()"), self.writeToFile)
+    #QObject.disconnect(self.aboutAction, SIGNAL("activated()"), self.about)
+    self.aboutAction.triggered.disconnect(self.about)
+    # TODO
+    #QObject.disconnect(self.helpAction, SIGNAL("activated()"), self.showHelp)
+    self.action.triggered.disconnect(self.run)
+    self.dlg.accepted.connect(self.writeToFile)
 
   # run method that performs all the real work
   def run(self):
@@ -207,28 +210,31 @@ class SimpleSvg:
     # for all visible layers, from bottom to top (-1)
     for i in range (self.iface.mapCanvas().layerCount()-1, -1, -1):
         layer = self.iface.mapCanvas().layer(i)
-        if layer.type()==0: # vector
-          if self.isRendererV2(layer):
-            #QMessageBox.information(self.iface.mainWindow(), "Warning", "New Symbology layer found for layer '"+layer.name()+"'\n\nThe plugin cannot handle layer(s) which use 'New Symbology' yet.\n\nThis layer will be ignored in export.\n\nPlease change symbology of these layer(s) to 'Old Symbology' if you want this layer in svg.")
-            #pass
+        if layer.type() == QgsMapLayer.VectorLayer:  # 0 vector
             svg.extend(self.writeVectorLayer(layer, False))
-          else: # old symbology
-            svg.extend(self.writeVectorLayer(layer, False))
-        elif layer.type()==1: # raster
-          svg.extend(self.writeRaster(layer))
+          # TODO REMOVE CLEAN: old renderer stuff
+          # if self.isRendererV2(layer):
+          #   #QMessageBox.information(self.iface.mainWindow(), "Warning", "New Symbology layer found for layer '"+layer.name()+"'\n\nThe plugin cannot handle layer(s) which use 'New Symbology' yet.\n\nThis layer will be ignored in export.\n\nPlease change symbology of these layer(s) to 'Old Symbology' if you want this layer in svg.")
+          #   #pass
+          #   svg.extend(self.writeVectorLayer(layer, False))
+          # # else: # old symbology
+          # #   svg.extend(self.writeVectorLayer(layer, False))
+        elif layer.type() == QgsMapLayer.RasterLayer:  # 1 raster
+            svg.extend(self.writeRaster(layer))
         # layers like OpenLayers/OpenStreetmap/Google are plugin layer: write as raster for now
-        elif layer.type()==2: # plugin layer 
-          svg.extend(self.writeRaster(layer))
+        elif layer.type() == QgsMapLayer.PluginLayer:  # 2 plugin layer
+            svg.extend(self.writeRaster(layer))
 
     # now layers with labels
-    for i in range (self.iface.mapCanvas().layerCount()-1, -1, -1):
-        layer = self.iface.mapCanvas().layer(i)
-        if layer.type()==0: # vector
-          lblSettings = QgsPalLayerSettings()
-          lblSettings.readFromLayer( layer )
-        #TODO: fix this if layer.type()==0 and layer.hasLabelsEnabled(): # only vectors have labels
-        if layer.type()==0 and lblSettings.enabled: # only vectors have labels
-          svg.extend(self.writeVectorLayer(layer, True))
+    # TODO Make labels work again
+    # for i in range (self.iface.mapCanvas().layerCount()-1, -1, -1):
+    #     layer = self.iface.mapCanvas().layer(i)
+    #     if layer.type() == QgsMapLayer.VectorLayer:  # 0 vector
+    #         lblSettings = QgsPalLayerSettings()
+    #         lblSettings.readFromLayer(layer)
+    #     #TODO: fix this if layer.type()==0 and layer.hasLabelsEnabled(): # only vectors have labels
+    #     if layer.type() == QgsMapLayer.VectorLayer and lblSettings.enabled: # only vectors have labels
+    #         svg.extend(self.writeVectorLayer(layer, True))
 
     # qgis extent, usable for clipping in Inkscape
     svg.extend(self.writeExtent())
@@ -236,22 +242,22 @@ class SimpleSvg:
     return svg
 
   def isRendererV2(self, layer):
-    return (layer.type()==0 and hasattr(layer, 'isUsingRendererV2') and layer.isUsingRendererV2()) or (layer.type()==0 and not hasattr(layer, 'isUsingRendererV2') and ('rendererV2' in dir(layer)))
+      # TODO CHECK
+      return layer.type() == QgsMapLayer.VectorLayer
+      # return (layer.type() == QgsMapLayer.VectorLayer and hasattr(layer, 'isUsingRendererV2') and layer.isUsingRendererV2()) \
+      #        or (layer.type() == QgsMapLayer.VectorLayer and not hasattr(layer, 'isUsingRendererV2') and ('rendererV2' in dir(layer)))
 
   def isRendererV2SIP2(self, layer):
-    return (layer.type()==0 and not hasattr(layer, 'isUsingRendererV2') and ('rendererV2' in dir(layer)))
+      # TODO CHECK
+      return layer.type() == QgsMapLayer.VectorLayer
+      #return (layer.type() == QgsMapLayer.VectorLayer and not hasattr(layer, 'isUsingRendererV2') and ('rendererV2' in dir(layer)))
 
   def writeVectorLayer(self, layer, labels=False):
     # in case of 'on the fly projection' 
     # AND 
     # different crs's for mapCanvas/project and layer we have to reproject stuff
-    if hasattr(self.iface.mapCanvas().mapRenderer(), "destinationSrs"):
-        # QGIS < 2.0
-        destinationCrs = self.iface.mapCanvas().mapRenderer().destinationSrs()
-        layerCrs = layer.srs()
-    else:
-        destinationCrs = self.iface.mapCanvas().mapRenderer().destinationCrs()
-        layerCrs = layer.crs()
+    destinationCrs = self.iface.mapCanvas().mapSettings().destinationCrs()
+    layerCrs = layer.crs()
     if self.featuresInMapcanvasOnly:
         mapCanvasExtent = self.iface.mapCanvas().extent()
     else:
@@ -264,59 +270,40 @@ class SimpleSvg:
       # to retrieve the features from the data provider
       # but ONLY if we are working with on the fly projection
       # (because in that case we just 'fly' to the raw coordinates from data)
-      if self.iface.mapCanvas().hasCrsTransformEnabled():
-        # only if we have 'on te fly transformation' enabled
-        #    AND the mapCanvasExtent is the real mapcanvas extent (note: if we
-        # are going to write ALL features, then mapCanvasExtent is actually the layer extent)
-        if self.featuresInMapcanvasOnly:
-          crsTransform = QgsCoordinateTransform(destinationCrs, layerCrs)
-          mapCanvasExtent = crsTransform.transformBoundingBox(mapCanvasExtent)
-        # we have to have a transformer to do the transformation of the geometries
-        # to the mapcanvas crs ourselves:
-        crsTransform = QgsCoordinateTransform(layerCrs, destinationCrs)
-        doCrsTransform = True
+      if self.featuresInMapcanvasOnly:
+        crsTransform = QgsCoordinateTransform(destinationCrs, layerCrs, QgsProject.instance())
+        mapCanvasExtent = crsTransform.transformBoundingBox(mapCanvasExtent)
+      # we have to have a transformer to do the transformation of the geometries
+      # to the mapcanvas crs ourselves:
+      crsTransform = QgsCoordinateTransform(layerCrs, destinationCrs, QgsProject.instance())
+      doCrsTransform = True
 
-    lblSettings = QgsPalLayerSettings()
-    lblSettings.readFromLayer( layer )
+    # TODO MAKE LABELS WORK
+    #lblSettings = QgsPalLayerSettings()
+    #lblSettings.readFromLayer(layer)
 
     # select features within current extent,
     #   with  ALL attributes, WITHIN currentExtent, WITH geom, AND using Intersect instead of bbox
     # we are going to group all features by their symbol so in svg we can group them in a <g> tag with the symbol style
-    if self.isRendererV2(layer):
-      if hasattr(layer, 'isUsingRendererV2'):
-        # For QGis 1.8 API, new symbology
-        provider = layer.dataProvider();
-        provider.select(provider.attributeIndexes(), mapCanvasExtent, True, True)
-      else:
-        # For QGis 2.0 cleaned-up API
-        provider = layer.getFeatures( QgsFeatureRequest().setFilterRect(mapCanvasExtent))
-      renderer = layer.rendererV2()
-      if str(renderer.type()) not in ("singleSymbol", "categorizedSymbol", "graduatedSymbol"):
-        QMessageBox.information(self.iface.mainWindow(), "Warning", "New Symbology layer found for layer '"+layer.name()+"'\n\nThis layer uses a Renderer/Style which cannot be used with this plugin.\n\nThis layer will be ignored in export.")
-        return ""
-    else:
-      # For QGis <= 1.8 API, old symbology
-      provider = layer.dataProvider();
-      provider.select(provider.attributeIndexes(), mapCanvasExtent, True, True)
-      renderer = layer.renderer()
-    symbols = renderer.symbols()
+    provider = layer.getFeatures( QgsFeatureRequest().setFilterRect(mapCanvasExtent))
+    renderer = layer.renderer()
+    if str(renderer.type()) not in ("singleSymbol", "categorizedSymbol", "graduatedSymbol"):
+      QMessageBox.information(self.iface.mainWindow(), "Warning", "New Symbology layer found for layer '"+layer.name()+"'\n\nThis layer uses a Renderer/Style which cannot be used with this plugin.\n\nThis layer will be ignored in export.")
+      return ""
+    symbols = renderer.symbols(QgsRenderContext()) # TODO check, is this the right context?
     symbolFeatureMap = dict.fromkeys(symbols, [])
-    id=self.sanitizeStr(unicode(layer.name()).lower())
+    id=self.sanitizeStr(str(layer.name()).lower())
     if labels:
         id=id+'_labels'
     svg = [u'<g id="'+id+'" inkscape:groupmode="layer" inkscape:label="'+id+'">\n']; # start of layer g-element
     # now iterate through each feature and group by feature
-    f = QgsFeature();
+    f = QgsFeature()
     feature = None
     #print "1 symbols holds %s symbols" % len(symbols)
     while provider.nextFeature(f):
       feature = QgsFeature(f)
       geom = feature.geometry()
-      if hasattr(layer, "srs"):
-        # QGIS < 2.0
-        layerCrs = layer.srs()
-      else:
-        layerCrs = layer.crs()
+      layerCrs = layer.crs()
 
       if doCrsTransform:
         if hasattr(geom, "transform"):
@@ -345,20 +332,16 @@ class SimpleSvg:
     if feature != None:
       id=id+'_'
       i=0
-      #print "2 symbols holds %s symbols" % len(symbols)
       for symbol in symbols:
-        if self.isRendererV2(layer):
-          sym = self.symbolV2(feature, symbol)
-        else:
-          sym = self.symbol(feature, symbol)
+        sym = self.createSymbol(feature, symbol, layer)
         # start of symbol g-element, holds colors and stroke etc
         if not labels:
           fill = ''
-          if sym.has_key('fill'):
+          if 'fill' in sym:
             fill = 'fill="' + sym['fill'] + '"'
           svg.append(u'<g stroke="' + sym['stroke'] + '" '+ fill + ' stroke-linejoin="' + self.strokeLineJoin + '" stroke-width="' + sym['stroke-width'] +'">\n')
         else:
-          # TODO fix this
+          # TODO fix this, use color of label ??
           if False:
             lc = layer.label().labelAttributes().color()
             lblColor = u'rgb(%s,%s,%s)' % (lc.red(), lc.green(), lc.blue())
@@ -369,14 +352,18 @@ class SimpleSvg:
           i=i+1
           # labeltxt is used both for the real labels, AND for the inkscape-label attributes of g and txt elements
           # TODO fix this
-          if lblSettings.enabled:
-            labeltxt = self.sanitizeStr(feature[lblSettings.fieldName])
-          else:
-            #labeltxt = self.sanitizeStr(layer.label().fieldValue(0, feature)) # only first field for now.
-            #labeltxt = self.sanitizeStr(unicode(feature.fields().field(0)))
-            labeltxt = self.sanitizeStr('')
+          # if lblSettings.enabled:
+          #   labeltxt = self.sanitizeStr(feature[lblSettings.fieldName])
+          # else:
+          #   #labeltxt = self.sanitizeStr(layer.label().fieldValue(0, feature)) # only first field for now.
+          #   #labeltxt = self.sanitizeStr(unicode(feature.fields().field(0)))
+          #   labeltxt = self.sanitizeStr('')
+          labeltxt = self.sanitizeStr('')  # TODO: temp until labels fixed
+
           if not labels:
-            svg.extend(self.writeFeature(feature, id+str(i), labeltxt))
+              # we are going to use the 'displayName' == 'layer.displayField()' column as node-id/labelfor inkscape
+              feature_label = self.sanitizeStr(feature[layer.displayField()])
+              svg.extend(self.writeFeature(feature, id+str(i), feature_label))
           if labels:
             geom = feature.geometry().centroid()
             # centroid-method returns a NON-transformed centroid
@@ -386,30 +373,32 @@ class SimpleSvg:
               else:
                 QMessageBox.warning(self.iface.mainWindow(), self.MSG_BOX_TITLE, ("Cannot crs-transform geometry in your QGIS version ...\n" "Only QGIS version 1.5 and above can transform geometries on the fly\n" "As a workaround, you can try to save the layer in the destination crs (eg as shapefile) and reload that layer...\n"), QMessageBox.Ok, QMessageBox.Ok)
                 break
+            # actual label node
             svg.extend(self.label2svg(geom.asPoint(), id+str(i), self.symbolForFeature(layer, feature), labeltxt))
         svg.append(u'</g>\n'); # end of symbol
     svg.append(u'</g>\n'); # end of layer
     return svg
 
-  def symbol(self, feature, symbol):
-    sym={}
-    sc = symbol.color()
-    sym['stroke'] = u'rgb(%s,%s,%s)' % (sc.red(), sc.green(), sc.blue())
-    # fill color: only non line features have fill color, lines have 'none'
-    geom = feature.geometry()
-    if geom.wkbType() in (QGis.WKBLineString, QGis.WKBLineString25D, QGis.WKBMultiLineString, QGis.WKBMultiLineString25D):
-      sym['fill'] = u'none'
-    else:
-      f = symbol.fillColor()
-      sym['fill'] = u'rgb(%s,%s,%s)' % (f.red(), f.green(), f.blue())
-    # pen: in QT pen can be 0
-    if symbol.pen().width() < 1:
-      sym['stroke-width'] = u'0.5'
-    else:
-      sym['stroke-width'] = unicode(symbol.pen().width())
-    return sym
+  # TODO REMOVE ??? as this is 1.8 symbols stuff
+  # def symbol(self, feature, symbol):
+  #   sym={}
+  #   sc = symbol.color()
+  #   sym['stroke'] = u'rgb(%s,%s,%s)' % (sc.red(), sc.green(), sc.blue())
+  #   # fill color: only non line features have fill color, lines have 'none'
+  #   geom = feature.geometry()
+  #   if geom.wkbType() in (QgsWkbTypes.WKBLineString, QgsWkbTypes.WKBLineString25D, QgsWkbTypes.WKBMultiLineString, QgsWkbTypes.WKBMultiLineString25D):
+  #     sym['fill'] = u'none'
+  #   else:
+  #     f = symbol.fillColor()
+  #     sym['fill'] = u'rgb(%s,%s,%s)' % (f.red(), f.green(), f.blue())
+  #   # pen: in QT pen can be 0
+  #   if symbol.pen().width() < 1:
+  #     sym['stroke-width'] = u'0.5'
+  #   else:
+  #     sym['stroke-width'] = str(symbol.pen().width())
+  #   return sym
 
-  def symbolV2(self, feature, symbol):
+  def createSymbol(self, feature, symbol, layer):
     #print '##### symbol: %s, symbollayercount: %s' % (symbol, symbol.symbolLayerCount())
     sym={}
     if symbol.symbolLayerCount() > 1:
@@ -423,48 +412,40 @@ class SimpleSvg:
     #  {PyQt4.QtCore.QString(u'color_border'): PyQt4.QtCore.QString(u'0,0,0,255'), PyQt4.QtCore.QString(u'offset'): PyQt4.QtCore.QString(u'0,0'), PyQt4.QtCore.QString(u'size'): PyQt4.QtCore.QString(u'2'), PyQt4.QtCore.QString(u'color'): PyQt4.QtCore.QString(u'255,0,0,255'), PyQt4.QtCore.QString(u'name'): PyQt4.QtCore.QString(u'circle'), PyQt4.QtCore.QString(u'angle'): PyQt4.QtCore.QString(u'0')}
     # lines have          : color / offset / penstyle / width / use_custom_dash / joinstyle / customdash / capstyle:
     #  {PyQt4.QtCore.QString(u'color'): PyQt4.QtCore.QString(u'255,255,0,255'), PyQt4.QtCore.QString(u'offset'): PyQt4.QtCore.QString(u'0'), PyQt4.QtCore.QString(u'penstyle'): PyQt4.QtCore.QString(u'solid'), PyQt4.QtCore.QString(u'width'): PyQt4.QtCore.QString(u'0.5'), PyQt4.QtCore.QString(u'use_custom_dash'): PyQt4.QtCore.QString(u'0'), PyQt4.QtCore.QString(u'joinstyle'): PyQt4.QtCore.QString(u'bevel'), PyQt4.QtCore.QString(u'customdash'): PyQt4.QtCore.QString(u'5;2'), PyQt4.QtCore.QString(u'capstyle'): PyQt4.QtCore.QString(u'square')}
-    try:
-        strokekey = QString(u'line_color')
-        strokekey2 = QString(u'outline_color')
-        colorkey = QString(u'color')
-        stylekey = QString(u'style')
-        width_borderkey = QString(u'width_border')
-        widthkey = QString(u'width')
-    except NameError:
-        strokekey = u'line_color'
-        strokekey2 = u'outline_color'
-        colorkey = u'color'
-        stylekey = u'style'
-        width_borderkey = u'width_border'
-        widthkey = u'width'
-    if slprops.has_key(strokekey):
-      stroke = unicode(slprops[strokekey])
+    strokekey = u'line_color'
+    strokekey2 = u'outline_color'
+    colorkey = u'color'
+    stylekey = u'style'
+    width_borderkey = u'width_border'
+    widthkey = u'width'
+    if strokekey in slprops:
+      stroke = slprops[strokekey]
       sym['stroke'] = u'rgb(%s)' % (stroke[:stroke.rfind(',')])
-    elif slprops.has_key(strokekey2):
-      stroke = unicode(slprops[strokekey2])
+    elif strokekey2 in slprops:
+      stroke = str(slprops[strokekey2])
       sym['stroke'] = u'rgb(%s)' % (stroke[:stroke.rfind(',')])
     else:
       sym['stroke'] = u'none'
     # fill color: only non line features have fill color, lines have 'none'
     geom = feature.geometry()
-    if slprops.has_key(colorkey):
-      fill = unicode(slprops[colorkey])
-      if geom.wkbType() in (QGis.WKBLineString, QGis.WKBLineString25D, QGis.WKBMultiLineString, QGis.WKBMultiLineString25D):
+    if colorkey in slprops:
+      fill = str(slprops[colorkey])
+      if QgsWkbTypes.geometryType(geom.wkbType())  == QgsWkbTypes.GeometryType.LineGeometry:
         sym['stroke'] = u'rgb(%s)' % (fill[:fill.rfind(',')])
       # points have fill and stroke
       sym['fill'] = u'rgb(%s)' % (fill[:fill.rfind(',')])
     # if feature is line OR when there is no brush: set fill to none
-    if geom.wkbType() in (QGis.WKBLineString, QGis.WKBLineString25D, QGis.WKBMultiLineString, QGis.WKBMultiLineString25D) \
-            or (slprops.has_key(stylekey) and slprops[stylekey] == 'no'):
+    if QgsWkbTypes.geometryType(geom.wkbType()) == QgsWkbTypes.GeometryType.LineGeometry \
+       or (stylekey in slprops and slprops[stylekey] == 'no'):
       sym['fill'] = u'none'
     # pen: in QT pen can be 0
-    if slprops.has_key(width_borderkey):
-      sym['stroke-width'] = unicode(slprops[width_borderkey])
-    elif slprops.has_key(widthkey):
-      sym['stroke-width'] = unicode(slprops[widthkey])
+    if width_borderkey in slprops:
+      sym['stroke-width'] = str(slprops[width_borderkey])
+    elif widthkey in slprops:
+      sym['stroke-width'] = str(slprops[widthkey])
     else:
       sym['stroke-width'] = u'0.40'
-    #print sym
+    #print(sym)
     return sym
 
 
@@ -477,7 +458,7 @@ class SimpleSvg:
             pixpoint =  self.w2p(point.x(), point.y(), self.iface.mapCanvas().mapUnitsPerPixel(), self.currentExtent.xMinimum(), self.currentExtent.yMaximum())
             if not first:
                 svg.append(u'L ')
-            svg.append((unicode(pixpoint[0]) + ',' + unicode(pixpoint[1]) + ' '))
+            svg.append((str(pixpoint[0]) + ',' + str(pixpoint[1]) + ' '))
             first = False
         svg.append(u'" />\n')
     svg.append(u'</g>')
@@ -485,16 +466,29 @@ class SimpleSvg:
 
 
   def writeRaster(self, layer):
+
     # hide all layers except 'layer' and save as png image in current directory
-    # TODO? maybe inline it in svg?
+    # TODO maybe inline it in svg?
+
+    # TODO CLEANUP
+    # visibleList=self.iface.mapCanvas().layers()
+    # legend = self.iface.legendInterface()
+    # # set all layers invisible EXCEPT layer
+    # for lyr in visibleList:
+    #   if lyr != layer:
+    #     legend.setLayerVisible(lyr, False)
+
     # save visibility of layers
-    visibleList=self.iface.mapCanvas().layers()
-    legend = self.iface.legendInterface()
-    # set all layers invisible EXCEPT layer
-    for lyr in visibleList:
-      if lyr != layer:
-        legend.setLayerVisible(lyr, False)
-    lyrName = unicode(layer.name())
+    root = QgsProject.instance().layerTreeRoot()
+    visible_tree_layers = []
+    layers = root.findLayers()
+    for tree_layer in layers:
+        if tree_layer.isVisible():
+            visible_tree_layers.append(tree_layer)
+            if tree_layer.layerId() != layer.id():
+                tree_layer.setItemVisibilityChecked(False)
+
+    lyrName = layer.name()
     imgName = lyrName+'.png'
     try:
         imgPath= self.svgFilename[:self.svgFilename.rfind('/')+1]
@@ -507,9 +501,10 @@ class SimpleSvg:
     #svg.append('<image y="0" x="0" xlink:href="'+imgPath+imgName+'" />')
     svg.append(u'<image y="0" x="0" xlink:href="'+imgName+'" />')
     svg.append(u'</g>') # end of raster layer
+
     # now set earlier visible layers back to visible
-    for lyr in visibleList:
-      legend.setLayerVisible(lyr, True)
+    for tl in visible_tree_layers:
+        tl.setItemVisibilityChecked(True)
     return svg
 
   def label2svg(self, point, fid, symbol, labelTxt):
@@ -518,44 +513,45 @@ class SimpleSvg:
     xy =  self.w2p(point.x(), point.y(), self.iface.mapCanvas().mapUnitsPerPixel(), self.currentExtent.xMinimum(), self.currentExtent.yMaximum())
     inkscapeLbl = ''
     if len(labelTxt)>0:
-        inkscapeLbl = 'inkscape:label="'+unicode(labelTxt+'_lbl')+'"'
-    svg = [u'<text id="'+fid+'" x="'+unicode(xy[0])+'" y="'+unicode(xy[1])+'" '+inkscapeLbl+'>'+unicode(labelTxt)+'</text>\n']
+        inkscapeLbl = 'inkscape:label="'+labelTxt+'_lbl'+'"'
+    svg = [u'<text id="'+fid+'" x="'+str(xy[0])+'" y="'+str(xy[1])+'" '+inkscapeLbl+'>'+str(labelTxt)+'</text>\n']
     return svg
 
   def sanitizeStr(self, string):
     # TODO: find the right way to do this
-    return unicode(string).replace(' ','_').replace('/','_').replace(',','_').replace('.','_')
+    return str(string).replace(' ','_').replace('/','_').replace(',','_').replace('.','_')
 
   def writeFeature(self, feature, fid, labelTxt):
     svg = []
     # <g>-element set's style attributes
     inkscapeLbl = ''
     if len(labelTxt)>0:
-        inkscapeLbl = 'inkscape:label="'+unicode(labelTxt)+'"'
+        inkscapeLbl = 'inkscape:label="'+str(labelTxt)+'"'
     svg.append(u'<g id="' + fid + '" '+inkscapeLbl+'>\n')
     geom=feature.geometry()
     currentExtent=self.currentExtent
-    # https://qgis.org/api/2.18/classQGis.html#a8da456870e1caec209d8ba7502cceff7
-    #print(geom.wkbType(), QGis.WKBPoint, QGis.WKBPoint25D)
-    if geom.wkbType() in (QGis.WKBPoint, QGis.WKBPoint25D): # 1 = WKBPoint
-        point = geom.asPoint()
-        svg.extend(self.point2svg(point, currentExtent))
-    if geom.wkbType() in (QGis.WKBMultiPoint, QGis.WKBMultiPoint25D):
+
+    # instead of checking if geom is multiple-type or not, just assume it:
+    # TODO: CLEANUP
+    # if geom.wkbType() == QgsWkbTypes.GeometryType.PointGeometry: # 1 = WKBPoint
+    #     point = geom.asPoint()
+    #     svg.extend(self.point2svg(point, currentExtent))
+    if QgsWkbTypes.geometryType(geom.wkbType()) == QgsWkbTypes.GeometryType.PointGeometry:
         multipoint = geom.asMultiPoint()
         for point in multipoint:
           svg.extend(self.point2svg(point, currentExtent))
-    if geom.wkbType() in (QGis.WKBPolygon, QGis.WKBPolygon25D): # 3 = WKBTYPE.WKBPolygon:
-        polygon = geom.asPolygon()  # returns a list
-        svg.extend(self.polygon2svg(feature, polygon, currentExtent))
-    if geom.wkbType() in (QGis.WKBMultiPolygon,QGis.WKBMultiPolygon25D ): # 6 = WKBTYPE.WKBMultiPolygon:
+    # if geom.wkbType() in (QgsWkbTypes.WKBPolygon, QgsWkbTypes.WKBPolygon25D): # 3 = WKBTYPE.WKBPolygon:
+    #     polygon = geom.asPolygon()  # returns a list
+    #     svg.extend(self.polygon2svg(feature, polygon, currentExtent))
+    if QgsWkbTypes.geometryType(geom.wkbType()) == QgsWkbTypes.GeometryType.PolygonGeometry: # 6 = WKBTYPE.WKBMultiPolygon:
         multipolygon = geom.asMultiPolygon() # returns a list
         for polygon in multipolygon:
           svg.extend(self.polygon2svg(feature, polygon, currentExtent))
-    if geom.wkbType() in (QGis.WKBLineString, QGis.WKBLineString25D): # 6 = WKBTYPE.WKBLineString:
-        line = geom.asPolyline()  # returns a list of points
-        svg.extend(self.line2svg(feature, line, currentExtent))
-    if geom.wkbType() in (QGis.WKBMultiLineString, QGis.WKBMultiLineString25D): # 6 = WKBTYPE.WKBLineString:
-        multiline = geom.asMultiPolyline()  # returns a list of points
+    # if geom.wkbType() in (QgsWkbTypes.WKBLineString, QgsWkbTypes.WKBLineString25D): # 6 = WKBTYPE.WKBLineString:
+    #     line = geom.asPolyline()  # returns a list of points
+    #     svg.extend(self.line2svg(feature, line, currentExtent))
+    if QgsWkbTypes.geometryType(geom.wkbType()) == QgsWkbTypes.GeometryType.LineGeometry:
+        multiline = geom.asMultiPolyline()  # returns a list
         for line in multiline:
             svg.extend(self.line2svg(feature, line, currentExtent))
     svg.append(u'</g>\n');
@@ -566,80 +562,82 @@ class SimpleSvg:
     xy =  self.w2p(point.x(), point.y(), self.iface.mapCanvas().mapUnitsPerPixel(), self.currentExtent.xMinimum(), self.currentExtent.yMaximum())
     #print(point, xy, point.x(), point.y(), self.iface.mapCanvas().mapUnitsPerPixel(), self.currentExtent.xMinimum(), self.currentExtent.yMaximum())
     # TODO take current extent into account
-    svg = ['<circle cx="'+unicode(xy[0])+'" cy="'+unicode(xy[1])+'" r="5" />']
+    svg = ['<circle cx="'+str(xy[0])+'" cy="'+str(xy[1])+'" r="5" />']
     return svg
 
   def symbolForFeature(self, layer, feature):
-    if self.isRendererV2(layer):
-        return layer.rendererV2().symbolForFeature(feature)
-    else: 
-      # symbolForFeatures seems not to work for Old Symbology?? Do it ourselves:
-      # OLD symbolisation:
-      #   Graduated Symbol: every symbol has BOTH upper and lower bound/value
-      #   Unique Value: every symbol has BOTH upper and lower value
-      #   Continues Color: HAS lower(==value) but NO upper value, BUT has just two symbols: MIN and MAX color, see http://doc.qgis.org/head/qgscontinuouscolorrenderer_8cpp-source.html
-      #   Single Simbol: just one symbol, return it
-      renderer = layer.renderer()
-      #print "renderer.name(): %s" % renderer.name()
-      default = None
-      if renderer.name() == "Single Symbol":   # there is just one symbol: return it
-        return renderer.symbols()[0]
-      if renderer.name() == "Continuous Color":
-        #pass  # already done, should not come here !!
-        minSymbol = renderer.symbols()[0]
-        minValue = (minSymbol.lowerValue()).toDouble()[0]  # we know Continuous Color only works with numeric attributes
-        minRed = minSymbol.fillColor().red()
-        minGreen = minSymbol.fillColor().green()
-        minBlue = minSymbol.fillColor().blue()
-        maxSymbol = renderer.symbols()[1]
-        maxValue = (maxSymbol.lowerValue()).toDouble()[0]  # we know Continuous Color only works with numeric attributes
-        maxRed = maxSymbol.fillColor().red()
-        maxGreen = maxSymbol.fillColor().green()
-        maxBlue = maxSymbol.fillColor().blue()
-        # create new symbol and set RGB according to calculation in http://doc.qgis.org/head/qgscontinuouscolorrenderer_8cpp-source.html
-        symbol = QgsSymbol(minSymbol) # copy
-        value = (feature.attributeMap()[renderer.classificationAttributes()[0]]).toDouble()[0]  # we know Continuous Color only works with numeric attributes
-        if (maxValue - minValue) != 0:
-          red = int ( maxRed * ( value - minValue ) / ( maxValue - minValue ) + minRed * ( maxValue - value ) / ( maxValue - minValue ) )
-          green = int ( maxGreen * ( value - minValue ) / ( maxValue - minValue ) + minGreen * ( maxValue - value ) / ( maxValue - minValue ) )
-          blue =  int ( maxBlue * ( value - minValue ) / ( maxValue - minValue ) + minBlue * ( maxValue - value ) / ( maxValue - minValue ) )
-        else:
-          red = minRed
-          green = minGreen
-          blue = minBlue
-        newFillColor = QColor(red, green, blue)
-        symbol.setFillColor(newFillColor)
-        if renderer.drawPolygonOutline():
-          # always black
-          color = QColor(0,0,0)
-          symbol.setColor(color)
-        else:
-          symbol.setColor(newFillColor)
-        return symbol
-      # else loop over symbols to find the current symbol for this feature
-      # value can be string or numbers...
-      value = (feature.attributeMap()[renderer.classificationAttributes()[0]]).toString()
-      for symbol in renderer.symbols():
-        lower = symbol.lowerValue()
-        upper = symbol.upperValue()
-        #print "lower: %s upper: %s value: %s notlower %s, notupper %s, value==lower %s, value=upper %s, str(value)[0].isdigit() %s" % (lower, upper, value, (not lower), (not upper), (value == lower), (value == upper), str(value)[0].isdigit())
-        if not lower and not upper:
-            # 'default value' given for default in Unique Value
-            default = symbol
-        # Unique Value symbols have the value in both upper and lower value (if values are string!)
-        elif (value == lower and value == upper):
-          return symbol
-        # Unique Value symbols for numbers do not have an upper
-        elif str(value)[0].isdigit() and not upper and float(value) == float(symbol.lowerValue()):
-          return symbol
-        # Graduated Classifications have lower AND uppervalues AND values are always numbers
-        elif str(value)[0].isdigit() and upper and lower and (float(value) >= float(symbol.lowerValue()) and float(value) <= float(symbol.upperValue())):
-          #print "Graduated Classification:  %s between %s and %s " % (value, symbol.lowerValue(), symbol.upperValue())
-          return symbol
-        #else:
-        #  print "NEXT..."
-      #print "RETURNING DEFAULT!!"
-      return default
+      return layer.renderer().symbolForFeature(feature, QgsRenderContext())
+    # TODO REMOVE: old stuff for old symbolisation ??
+    # if self.isRendererV2(layer):
+    #     return layer.rendererV2().symbolForFeature(feature)
+    # else:
+    #   # symbolForFeatures seems not to work for Old Symbology?? Do it ourselves:
+    #   # OLD symbolisation:
+    #   #   Graduated Symbol: every symbol has BOTH upper and lower bound/value
+    #   #   Unique Value: every symbol has BOTH upper and lower value
+    #   #   Continues Color: HAS lower(==value) but NO upper value, BUT has just two symbols: MIN and MAX color, see http://doc.qgis.org/head/qgscontinuouscolorrenderer_8cpp-source.html
+    #   #   Single Simbol: just one symbol, return it
+    #   renderer = layer.renderer()
+    #   #print "renderer.name(): %s" % renderer.name()
+    #   default = None
+    #   if renderer.name() == "Single Symbol":   # there is just one symbol: return it
+    #     return renderer.symbols(QgsRenderContext())[0]
+    #   if renderer.name() == "Continuous Color":
+    #     #pass  # already done, should not come here !!
+    #     minSymbol = renderer.symbols(QgsRenderContext())[0]
+    #     minValue = (minSymbol.lowerValue()).toDouble()[0]  # we know Continuous Color only works with numeric attributes
+    #     minRed = minSymbol.fillColor().red()
+    #     minGreen = minSymbol.fillColor().green()
+    #     minBlue = minSymbol.fillColor().blue()
+    #     maxSymbol = renderer.symbols(QgsRenderContext())[1]
+    #     maxValue = (maxSymbol.lowerValue()).toDouble()[0]  # we know Continuous Color only works with numeric attributes
+    #     maxRed = maxSymbol.fillColor().red()
+    #     maxGreen = maxSymbol.fillColor().green()
+    #     maxBlue = maxSymbol.fillColor().blue()
+    #     # create new symbol and set RGB according to calculation in http://doc.qgis.org/head/qgscontinuouscolorrenderer_8cpp-source.html
+    #     symbol = QgsSymbol(minSymbol) # copy
+    #     value = (feature.attributeMap()[renderer.classificationAttributes()[0]]).toDouble()[0]  # we know Continuous Color only works with numeric attributes
+    #     if (maxValue - minValue) != 0:
+    #       red = int ( maxRed * ( value - minValue ) / ( maxValue - minValue ) + minRed * ( maxValue - value ) / ( maxValue - minValue ) )
+    #       green = int ( maxGreen * ( value - minValue ) / ( maxValue - minValue ) + minGreen * ( maxValue - value ) / ( maxValue - minValue ) )
+    #       blue =  int ( maxBlue * ( value - minValue ) / ( maxValue - minValue ) + minBlue * ( maxValue - value ) / ( maxValue - minValue ) )
+    #     else:
+    #       red = minRed
+    #       green = minGreen
+    #       blue = minBlue
+    #     newFillColor = QColor(red, green, blue)
+    #     symbol.setFillColor(newFillColor)
+    #     if renderer.drawPolygonOutline():
+    #       # always black
+    #       color = QColor(0,0,0)
+    #       symbol.setColor(color)
+    #     else:
+    #       symbol.setColor(newFillColor)
+    #     return symbol
+    #   # else loop over symbols to find the current symbol for this feature
+    #   # value can be string or numbers...
+    #   value = (feature.attributeMap()[renderer.classificationAttributes()[0]]).toString()
+    #   for symbol in renderer.symbols(QgsRenderContext()):
+    #     lower = symbol.lowerValue()
+    #     upper = symbol.upperValue()
+    #     #print "lower: %s upper: %s value: %s notlower %s, notupper %s, value==lower %s, value=upper %s, str(value)[0].isdigit() %s" % (lower, upper, value, (not lower), (not upper), (value == lower), (value == upper), str(value)[0].isdigit())
+    #     if not lower and not upper:
+    #         # 'default value' given for default in Unique Value
+    #         default = symbol
+    #     # Unique Value symbols have the value in both upper and lower value (if values are string!)
+    #     elif (value == lower and value == upper):
+    #       return symbol
+    #     # Unique Value symbols for numbers do not have an upper
+    #     elif str(value)[0].isdigit() and not upper and float(value) == float(symbol.lowerValue()):
+    #       return symbol
+    #     # Graduated Classifications have lower AND uppervalues AND values are always numbers
+    #     elif str(value)[0].isdigit() and upper and lower and (float(value) >= float(symbol.lowerValue()) and float(value) <= float(symbol.upperValue())):
+    #       #print "Graduated Classification:  %s between %s and %s " % (value, symbol.lowerValue(), symbol.upperValue())
+    #       return symbol
+    #     #else:
+    #     #  print "NEXT..."
+    #   #print "RETURNING DEFAULT!!"
+    #   return default
 
   def line2svg(self, feature, line, currentExtent):
     #print("calling line2svg...")
