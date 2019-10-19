@@ -5,11 +5,13 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:svg="http://www.w3.org/2000/svg">
     <body>
-        <h1>Simple SVG Qgis Plugin</h1>
+        <h1>Simple SVG QGIS Plugin</h1>
         <p>
         SimpleSvg is a plugin which tries to save current map as SVG. Other then the normal SaveAsSVG in the composer, this plugin tries to keep the GIS-grouping intact:
-        layers in Qgis will be layers in Inkscape, symbol classes will be groups. Objects will have ids with the layername in it, so the id's kan be used of a search in 
-        the xml-view of Inkscape.
+        layers in QGIS will be layers in Inkscape. Inkscape groups will have ids with the layername in it, so the id's kan be used of a search in
+        the xml-view (Ctrl-Shift-X) of Inkscape.<br/>
+        As extra feature, it is possible to set the 'Display Name' in the Layer Properties dialog to an attribute of
+            the layer. If set, THAT attribute value is then used to set an Inkscape Label on the xml item.
         </p>
         <p>
         The plugin uses the screen coordinates (pixel values) to set the svg coordinates.
@@ -20,12 +22,7 @@
         Be carefull though: fetching ALL data from big dataset can give other problems.
         </p>
         <p>
-        It can work with 'Old Symbology' and partially with 'New Symbology' both for vector- and raster layers. A raster layer  will be saved as image and included as an image element
-        with an external (to the file next to the svg).<br/>
-        The plugin wil also work with layers which have 'on the fly' projection enabled.
-        </p>
-        <p>
-        For lines and polygons it tries to save both pen and symbol style, most classifications are working.<br/>
+        For lines and polygons it tries to save both pen and symbol style. For now only working with Simple Symbols.<br/>
         For Points it can only save a point as a small colored circle.
         </p>
         <p>
@@ -41,65 +38,11 @@
         <img src="inkscape.png">
         </p>
         <p>
-        The plugin is available via the official contributed qgis repositories (as experimental plugin!) or you can <a href="simplesvg.zip">download latest plugin in zip here</a>
+        Install the plugin via the Plugin Manager within QGIS itself.
+            It is uploaded to the QGIS Plugin Repository <a href="https://plugins.qgis.org">https://plugins.qgis.org</a>
         </p>
-    
-    <h2>TODO's and idea's</h2>
-    <p>
-        <ul>
-            <li> better gui with more options
-            <li> use labels or names for features/objects
-            <li> add help button
-            <li> use of world coordinates and projection in svg (not yet used in Inkscape??)
-            <li> handle 'on the fly' projection
-            <li> handle polygon with holes
-            <li> handle new symbology (simple symbolisation)
-            <li> including advanced svg tags
-            <li> use svg symbols as points
-            <li> css styling?
-            <li> linking xref's for styles for symbols (css?)
-        </ul>
-    </p>
 
-    <h2>Versions</h2>
-
-    <p>
-    <ul>
-        <li>0.8.5 (04-2014): making labels work again, but bump min version to 2.0, and keeping the layers and names usable in Inkscape
-
-        <li>0.8.4 (01-2014): fix http://hub.qgis.org/issues/7971 thanks Scott Heavner
-
-        <li>0.8.3 (11-2013): fix with maprezing, thanks Christoph König, plus some other bugfixes
-
-        <li>0.8.2 (10-2013): fix for bug when saving raster
-
-        <li>0.8.1 (06-2013): work of Hien Tran-Quang, make it work for sip2 and QGIS2
-
-        <li>0.8  (06-2013): checkbox to just retrieve ALL features (meaning you actuall set a resolution for svg); more changes needed for QGIS 2.0 api (thanks Hien TRAN-QUANG) </li>
-
-        <li>0.7  (01-2013): changes needed for QGIS 2.0 api, move to web menu</li>
-
-        <li>0.6  (02-2012): addition of On The Fly Projection, new dialogs, addition of mapResizer(dialog), fixes in Unique Value Classification</li>
-
-        <li>0.5  (08-2011): fix for wrong path for raster layer, individual g-element grouped by symbol, first steps to making it possible to use New Symbology ("singleSymbol", "categorizedSymbol", "graduatedSymbol"), label-color used now</li>
-
-        <li>0.4  (06-2011): IF qgis has (had) a label, use that field as inkscape:label for easy find/recognition of element; fix for unicode/utf-8 errors (problems with labels and filename with non-ascii characters; fix for bug with non-visible layers; cleanup of code and svg; viewport is now mapcanvas size </li>
-
-        <li>0.3  (06-2011): fix for invalid svg for polygons with holes, implementation for multilines added, special qgisview rectangle to clip/crop the map, qgis notice in svg added</li>
-
-        <li>0.2  (06-2011): handles rasters, grouping per layer, inkscape specific attributes, all classification of old symbology working</li>
-
-        <li>0.1  (0?-20??): initial version, for internal use</li>
-    </ul>
-    </p>
-
-    <h3>Resources and inspiration</h3>
-    <p>
-    <a href="http://www.carto.net/papers/svg/samples/">Cartoweb</a><br/>
-    <a href="http://www.mappetizer.de/en/examples/">Mappetizer</a><br/>
-    </p>
-
-     <h2>Tips, comments, questions: richard at-sign duif.net (Richard Duivenvoorde)</h2>
+        <h2>Tips, comments, questions: richard at-sign duif.net (Richard Duivenvoorde)</h2>
 
 <body>
 </html>

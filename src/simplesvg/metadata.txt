@@ -5,14 +5,32 @@ version=3.0.0
 qgisMinimumVersion:2.99
 qgisMaximumVersion:3.99
 description:Create simple SVG from current view, editable with Inkscape
-about:Create simple SVG from current view, editable with Inkscape. Only for simple styling and data. In QGIS3 there is better support for SVGversion:0.9.0
-; end of mandatory metadata
+about:Create simple SVG from current view, editable with Inkscape (https://inkscape.org/).
 
+  Main purpose of this plugin is to load spatial data in QGIS, zoom to the area of interest and then create an ordered Inkscape svg file from that area.
+
+  The svg file has the following features (in the svg xml, see Shift-Ctrl-X in Inkscape):
+   - every QGIS layer has it's own SVG group (svg-g-item)
+   - every feature will be a separate svg-g-item with a possible 'inkscape-label' (see below) to distinguish the actual feature by name
+   - if you set a 'Display Name' in the QGIS layer properties, that column will be used to label each 'feature'
+   - so in Inkscape you can style a layer in one go OR style feature by feature
+
+  Only for simple styling and data (both Vector and Raster maps).
+
+  A raster layer is saved as a 'save as mapcanvas image' next to the svg, with a link to it IN the svg
+
+  In QGIS3 there is now better support for SVG, try that if you have a complex layout.
+
+  Current Limitations:
+   - best/only working with 'Single Symbol' (too much work to fiddle out the mapping between QGIS symbols and svg)
+   - currently working with screen coordinates
+
+; end of mandatory metadata
 
 ; start of optional metadata
 
 changelog:
-    3.0.0   (10-2019): make work in QGIS3
+    3.0.0   (10-2019): make most things work in QGIS3
     0.9.0   (10-2019): making stuff work in last QGIS 2.18 (see if somebody wants it to be ported to 3 :-) )
     0.8.5   (04-2014): making labels work again, but bump min version to 2.0, and keeping the layers and names usable in Inkscape
     0.8.4   (01-2014): fix http://hub.qgis.org/issues/7971 thanks Scott Heavner

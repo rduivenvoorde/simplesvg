@@ -82,8 +82,8 @@ SVG_TYPE_SHAPE = 2
 
 # pycharm debugging
 # COMMENT OUT BEFORE PACKAGING !!!
-import pydevd
-pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True, suspend=False)
+# import pydevd
+# pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True, suspend=False)
 
 class SimpleSvg:
 
@@ -101,7 +101,6 @@ class SimpleSvg:
     self.featuresInMapcanvasOnly = True
 
   def initGui(self):
-      # Create action that will start plugin configuration
     self.action = QAction(QIcon(":/plugins/simplesvg/icon.png"), \
             "Save as SVG", self.iface.mainWindow())
     # connect the action to the run method
@@ -111,12 +110,9 @@ class SimpleSvg:
     self.iface.addToolBarIcon(self.action)
     self.dlg = SimpleSvgDialog(self.iface)
     self.dlg.setFilePath(self.svgFilename)
-    # TODO
-    #QObject.connect(self.dlg, SIGNAL("showHelp()"), self.showHelp)
-    #QObject.connect(self.dlg, SIGNAL("accepted()"), self.writeToFile)
+    self.dlg.ui.buttonBox.helpRequested.connect(self.showHelp)
     self.dlg.accepted.connect(self.writeToFile)
-    #TODO
-    #QObject.connect(self.dlg, SIGNAL("cbFeaturesInMapcanvasOnlyChanged"), self.setFeaturesInMapcanvasOnly)
+    self.dlg.cbFeaturesInMapcanvasOnlyChanged.connect(self.setFeaturesInMapcanvasOnly)
 
     # about
     self.aboutAction = QAction(QIcon(":/plugins/simplesvg/help.png"), \
@@ -141,12 +137,12 @@ class SimpleSvg:
 
   def setFeaturesInMapcanvasOnly(self, checked):
     if not checked:
-        QMessageBox.information(self.dlg, "Warning", "Be carefull: unchecking this, means QGIS is going to fetch ALL objects from your data.\nHandle with care for big datasets.")
+        QMessageBox.information(self.dlg, "Warning", "Be carefull: unchecking this, means QGIS is going to fetch ALL objects from your data.\n\nHandle with care for big datasets.")
     self.featuresInMapcanvasOnly = checked
 
   def showHelp(self):
-    docFile = os.path.join(os.path.dirname(__file__), "docs","index.html")
-    QDesktopServices.openUrl( QUrl("file:" + docFile) )
+    docFile = os.path.join(os.path.dirname(__file__), "docs", "index.html")
+    QDesktopServices.openUrl(QUrl("file://" + docFile))
 
   def writeToFile(self):
       self.svgFilename = self.dlg.getFilePath()
@@ -164,7 +160,7 @@ class SimpleSvg:
 
   def about(self):
     infoString = "Written by Richard Duivenvoorde\nEmail - richard@duif.net\n"
-    infoString += "Company - http://www.webmapper.net\n"
+    infoString += "Company - https://zuidt.nl\n"
     infoString += "Source: http://github.com/rduivenvoorde/simplesvg/"
     QMessageBox.information(self.iface.mainWindow(), \
               "SimpleSvg Plugin About", infoString)
@@ -181,11 +177,8 @@ class SimpleSvg:
         self.iface.removePluginMenu("&Save as SVG",self.aboutAction)
 
     self.iface.removeToolBarIcon(self.action)
-
-    #QObject.disconnect(self.aboutAction, SIGNAL("activated()"), self.about)
     self.aboutAction.triggered.disconnect(self.about)
-    # TODO
-    #QObject.disconnect(self.helpAction, SIGNAL("activated()"), self.showHelp)
+    self.dlg.ui.buttonBox.helpRequested.disconnect(self.showHelp)
     self.action.triggered.disconnect(self.run)
     self.dlg.accepted.connect(self.writeToFile)
 
@@ -212,13 +205,6 @@ class SimpleSvg:
         layer = self.iface.mapCanvas().layer(i)
         if layer.type() == QgsMapLayer.VectorLayer:  # 0 vector
             svg.extend(self.writeVectorLayer(layer, False))
-          # TODO REMOVE CLEAN: old renderer stuff
-          # if self.isRendererV2(layer):
-          #   #QMessageBox.information(self.iface.mainWindow(), "Warning", "New Symbology layer found for layer '"+layer.name()+"'\n\nThe plugin cannot handle layer(s) which use 'New Symbology' yet.\n\nThis layer will be ignored in export.\n\nPlease change symbology of these layer(s) to 'Old Symbology' if you want this layer in svg.")
-          #   #pass
-          #   svg.extend(self.writeVectorLayer(layer, False))
-          # # else: # old symbology
-          # #   svg.extend(self.writeVectorLayer(layer, False))
         elif layer.type() == QgsMapLayer.RasterLayer:  # 1 raster
             svg.extend(self.writeRaster(layer))
         # layers like OpenLayers/OpenStreetmap/Google are plugin layer: write as raster for now
@@ -227,30 +213,15 @@ class SimpleSvg:
 
     # now layers with labels
     # TODO Make labels work again
-    # for i in range (self.iface.mapCanvas().layerCount()-1, -1, -1):
-    #     layer = self.iface.mapCanvas().layer(i)
-    #     if layer.type() == QgsMapLayer.VectorLayer:  # 0 vector
-    #         lblSettings = QgsPalLayerSettings()
-    #         lblSettings.readFromLayer(layer)
-    #     #TODO: fix this if layer.type()==0 and layer.hasLabelsEnabled(): # only vectors have labels
-    #     if layer.type() == QgsMapLayer.VectorLayer and lblSettings.enabled: # only vectors have labels
-    #         svg.extend(self.writeVectorLayer(layer, True))
+    for i in range (self.iface.mapCanvas().layerCount()-1, -1, -1):
+        layer = self.iface.mapCanvas().layer(i)
+        if layer.type() == QgsMapLayer.VectorLayer and layer.labelsEnabled(): # only vectors have labels
+            svg.extend(self.writeVectorLayer(layer, True))
 
     # qgis extent, usable for clipping in Inkscape
     svg.extend(self.writeExtent())
     svg.append(u'</svg>')
     return svg
-
-  def isRendererV2(self, layer):
-      # TODO CHECK
-      return layer.type() == QgsMapLayer.VectorLayer
-      # return (layer.type() == QgsMapLayer.VectorLayer and hasattr(layer, 'isUsingRendererV2') and layer.isUsingRendererV2()) \
-      #        or (layer.type() == QgsMapLayer.VectorLayer and not hasattr(layer, 'isUsingRendererV2') and ('rendererV2' in dir(layer)))
-
-  def isRendererV2SIP2(self, layer):
-      # TODO CHECK
-      return layer.type() == QgsMapLayer.VectorLayer
-      #return (layer.type() == QgsMapLayer.VectorLayer and not hasattr(layer, 'isUsingRendererV2') and ('rendererV2' in dir(layer)))
 
   def writeVectorLayer(self, layer, labels=False):
     # in case of 'on the fly projection' 
@@ -278,17 +249,21 @@ class SimpleSvg:
       crsTransform = QgsCoordinateTransform(layerCrs, destinationCrs, QgsProject.instance())
       doCrsTransform = True
 
-    # TODO MAKE LABELS WORK
-    #lblSettings = QgsPalLayerSettings()
-    #lblSettings.readFromLayer(layer)
+    # does his layer have labels?
+    lblSettings = False
+    if layer.labelsEnabled():
+        # returns QgsVectorLayerSimpleLabeling
+        #layer.labeling()
+        # returns QgsPalLayerSettings
+        lblSettings = layer.labeling().settings()
 
     # select features within current extent,
     #   with  ALL attributes, WITHIN currentExtent, WITH geom, AND using Intersect instead of bbox
     # we are going to group all features by their symbol so in svg we can group them in a <g> tag with the symbol style
     provider = layer.getFeatures( QgsFeatureRequest().setFilterRect(mapCanvasExtent))
     renderer = layer.renderer()
-    if str(renderer.type()) not in ("singleSymbol", "categorizedSymbol", "graduatedSymbol"):
-      QMessageBox.information(self.iface.mainWindow(), "Warning", "New Symbology layer found for layer '"+layer.name()+"'\n\nThis layer uses a Renderer/Style which cannot be used with this plugin.\n\nThis layer will be ignored in export.")
+    if str(renderer.type()) not in ("singleSymbol"):
+      QMessageBox.information(self.iface.mainWindow(), "Warning", "Sorry, current SimpleSVG plugin only works with SingleSymbol Styling.\n\nLayer '"+layer.name()+"' uses a Renderer/Style which cannot be used with this plugin.\n\nThis layer will be ignored in export.\n\nYou can export it using SimpleSymbols and styling in Inkscape?")
       return ""
     symbols = renderer.symbols(QgsRenderContext()) # TODO check, is this the right context?
     symbolFeatureMap = dict.fromkeys(symbols, [])
@@ -320,18 +295,18 @@ class SimpleSvg:
       if hasattr(renderer, 'name') and renderer.name() == "Continuous Color":
         symbols.append(symbol)
         if symbol in symbolFeatureMap:
-            symbolFeatureMap[symbol]=[feature]
+            symbolFeatureMap[symbol] = [feature]
         else:
-            symbolFeatureMap.update({symbol:[feature]})
+            symbolFeatureMap.update({symbol: [feature]})
       else:
-        if not symbol in symbolFeatureMap or len(symbolFeatureMap[symbol])==0:
-          symbolFeatureMap[symbol]=[feature]
+        if not symbol in symbolFeatureMap or len(symbolFeatureMap[symbol]) == 0:
+          symbolFeatureMap[symbol] = [feature]
         else:
           symbolFeatureMap[symbol].append(feature)
     # now iterate over symbols IF there are any features in this view from this layer
     if feature != None:
-      id=id+'_'
-      i=0
+      id = id+'_'
+      i = 0
       for symbol in symbols:
         sym = self.createSymbol(feature, symbol, layer)
         # start of symbol g-element, holds colors and stroke etc
@@ -351,18 +326,15 @@ class SimpleSvg:
         for feature in symbolFeatureMap[symbol]:
           i=i+1
           # labeltxt is used both for the real labels, AND for the inkscape-label attributes of g and txt elements
-          # TODO fix this
-          # if lblSettings.enabled:
-          #   labeltxt = self.sanitizeStr(feature[lblSettings.fieldName])
-          # else:
-          #   #labeltxt = self.sanitizeStr(layer.label().fieldValue(0, feature)) # only first field for now.
-          #   #labeltxt = self.sanitizeStr(unicode(feature.fields().field(0)))
-          #   labeltxt = self.sanitizeStr('')
-          labeltxt = self.sanitizeStr('')  # TODO: temp until labels fixed
-
+          labeltxt = self.sanitizeStr('')
+          if lblSettings:
+            labeltxt = self.sanitizeStr(feature[lblSettings.fieldName])
           if not labels:
               # we are going to use the 'displayName' == 'layer.displayField()' column as node-id/labelfor inkscape
-              feature_label = self.sanitizeStr(feature[layer.displayField()])
+              displayField = layer.displayField()
+              feature_label = id+str(i) # in case displayField is empty
+              if len(displayField)>0:
+                feature_label = self.sanitizeStr(feature[displayField])
               svg.extend(self.writeFeature(feature, id+str(i), feature_label))
           if labels:
             geom = feature.geometry().centroid()
@@ -374,49 +346,26 @@ class SimpleSvg:
                 QMessageBox.warning(self.iface.mainWindow(), self.MSG_BOX_TITLE, ("Cannot crs-transform geometry in your QGIS version ...\n" "Only QGIS version 1.5 and above can transform geometries on the fly\n" "As a workaround, you can try to save the layer in the destination crs (eg as shapefile) and reload that layer...\n"), QMessageBox.Ok, QMessageBox.Ok)
                 break
             # actual label node
-            svg.extend(self.label2svg(geom.asPoint(), id+str(i), self.symbolForFeature(layer, feature), labeltxt))
-        svg.append(u'</g>\n'); # end of symbol
-    svg.append(u'</g>\n'); # end of layer
+            svg.extend(self.label2svg(geom.asPoint(), id+str(i),
+                            self.symbolForFeature(layer, feature), labeltxt))
+        svg.append(u'</g>\n')  # end of symbol
+    svg.append(u'</g>\n')  # end of layer
     return svg
-
-  # TODO REMOVE ??? as this is 1.8 symbols stuff
-  # def symbol(self, feature, symbol):
-  #   sym={}
-  #   sc = symbol.color()
-  #   sym['stroke'] = u'rgb(%s,%s,%s)' % (sc.red(), sc.green(), sc.blue())
-  #   # fill color: only non line features have fill color, lines have 'none'
-  #   geom = feature.geometry()
-  #   if geom.wkbType() in (QgsWkbTypes.WKBLineString, QgsWkbTypes.WKBLineString25D, QgsWkbTypes.WKBMultiLineString, QgsWkbTypes.WKBMultiLineString25D):
-  #     sym['fill'] = u'none'
-  #   else:
-  #     f = symbol.fillColor()
-  #     sym['fill'] = u'rgb(%s,%s,%s)' % (f.red(), f.green(), f.blue())
-  #   # pen: in QT pen can be 0
-  #   if symbol.pen().width() < 1:
-  #     sym['stroke-width'] = u'0.5'
-  #   else:
-  #     sym['stroke-width'] = str(symbol.pen().width())
-  #   return sym
 
   def createSymbol(self, feature, symbol, layer):
     #print '##### symbol: %s, symbollayercount: %s' % (symbol, symbol.symbolLayerCount())
-    sym={}
+    sym = {}
     if symbol.symbolLayerCount() > 1:
       QMessageBox.information(self.iface.mainWindow(), "Warning", "Layer '"+layer.name()+"' uses New Symbology, and styles with more the one Symbol Layer, only the first one will be use.")
     sl = symbol.symbolLayer(0)
     slprops = sl.properties()
     #print("symbollayer properties: %s" % slprops)
-    # region/polgyons have: color_border / style_border / offset / style / color / width_border
-    #  {PyQt4.QtCore.QString(u'color_border'): PyQt4.QtCore.QString(u'0,0,0,255'), PyQt4.QtCore.QString(u'style_border'): PyQt4.QtCore.QString(u'solid'), PyQt4.QtCore.QString(u'offset'): PyQt4.QtCore.QString(u'0,0'), PyQt4.QtCore.QString(u'style'): PyQt4.QtCore.QString(u'solid'), PyQt4.QtCore.QString(u'color'): PyQt4.QtCore.QString(u'0,0,255,255'), PyQt4.QtCore.QString(u'width_border'): PyQt4.QtCore.QString(u'0.26')}
-    # markers/points have : color_border / offset / size / color / name / angle:
-    #  {PyQt4.QtCore.QString(u'color_border'): PyQt4.QtCore.QString(u'0,0,0,255'), PyQt4.QtCore.QString(u'offset'): PyQt4.QtCore.QString(u'0,0'), PyQt4.QtCore.QString(u'size'): PyQt4.QtCore.QString(u'2'), PyQt4.QtCore.QString(u'color'): PyQt4.QtCore.QString(u'255,0,0,255'), PyQt4.QtCore.QString(u'name'): PyQt4.QtCore.QString(u'circle'), PyQt4.QtCore.QString(u'angle'): PyQt4.QtCore.QString(u'0')}
-    # lines have          : color / offset / penstyle / width / use_custom_dash / joinstyle / customdash / capstyle:
-    #  {PyQt4.QtCore.QString(u'color'): PyQt4.QtCore.QString(u'255,255,0,255'), PyQt4.QtCore.QString(u'offset'): PyQt4.QtCore.QString(u'0'), PyQt4.QtCore.QString(u'penstyle'): PyQt4.QtCore.QString(u'solid'), PyQt4.QtCore.QString(u'width'): PyQt4.QtCore.QString(u'0.5'), PyQt4.QtCore.QString(u'use_custom_dash'): PyQt4.QtCore.QString(u'0'), PyQt4.QtCore.QString(u'joinstyle'): PyQt4.QtCore.QString(u'bevel'), PyQt4.QtCore.QString(u'customdash'): PyQt4.QtCore.QString(u'5;2'), PyQt4.QtCore.QString(u'capstyle'): PyQt4.QtCore.QString(u'square')}
     strokekey = u'line_color'
     strokekey2 = u'outline_color'
     colorkey = u'color'
     stylekey = u'style'
-    width_borderkey = u'width_border'
+    width_outline = u'outline_width'
+    width_line = u'line_width'
     widthkey = u'width'
     if strokekey in slprops:
       stroke = slprops[strokekey]
@@ -439,15 +388,16 @@ class SimpleSvg:
        or (stylekey in slprops and slprops[stylekey] == 'no'):
       sym['fill'] = u'none'
     # pen: in QT pen can be 0
-    if width_borderkey in slprops:
-      sym['stroke-width'] = str(slprops[width_borderkey])
+    if width_outline in slprops:
+      sym['stroke-width'] = str(slprops[width_outline])
     elif widthkey in slprops:
       sym['stroke-width'] = str(slprops[widthkey])
+    elif width_line in slprops:
+      sym['stroke-width'] = str(slprops[width_line])
     else:
       sym['stroke-width'] = u'0.40'
     #print(sym)
     return sym
-
 
   def writeExtent(self):
     svg = [u'<!-- QGIS extent for clipping, eg in Inkscape -->\n<g id="qgisviewbox" inkscape:groupmode="layer" inkscape:label="qgisviewbox" stroke="rgb(255,0,0)" stroke-width="1" fill="none" >\n']
@@ -463,7 +413,6 @@ class SimpleSvg:
         svg.append(u'" />\n')
     svg.append(u'</g>')
     return svg
-
 
   def writeRaster(self, layer):
 
@@ -531,30 +480,28 @@ class SimpleSvg:
     geom=feature.geometry()
     currentExtent=self.currentExtent
 
-    # instead of checking if geom is multiple-type or not, just assume it:
-    # TODO: CLEANUP
-    # if geom.wkbType() == QgsWkbTypes.GeometryType.PointGeometry: # 1 = WKBPoint
-    #     point = geom.asPoint()
-    #     svg.extend(self.point2svg(point, currentExtent))
     if QgsWkbTypes.geometryType(geom.wkbType()) == QgsWkbTypes.GeometryType.PointGeometry:
-        multipoint = geom.asMultiPoint()
-        for point in multipoint:
-          svg.extend(self.point2svg(point, currentExtent))
-    # if geom.wkbType() in (QgsWkbTypes.WKBPolygon, QgsWkbTypes.WKBPolygon25D): # 3 = WKBTYPE.WKBPolygon:
-    #     polygon = geom.asPolygon()  # returns a list
-    #     svg.extend(self.polygon2svg(feature, polygon, currentExtent))
-    if QgsWkbTypes.geometryType(geom.wkbType()) == QgsWkbTypes.GeometryType.PolygonGeometry: # 6 = WKBTYPE.WKBMultiPolygon:
-        multipolygon = geom.asMultiPolygon() # returns a list
-        for polygon in multipolygon:
-          svg.extend(self.polygon2svg(feature, polygon, currentExtent))
-    # if geom.wkbType() in (QgsWkbTypes.WKBLineString, QgsWkbTypes.WKBLineString25D): # 6 = WKBTYPE.WKBLineString:
-    #     line = geom.asPolyline()  # returns a list of points
-    #     svg.extend(self.line2svg(feature, line, currentExtent))
+        if geom.isMultipart():
+            points = geom.asMultiPoint()
+        else:
+            points = [geom.asPoint()]
+        for point in points:
+            svg.extend(self.point2svg(point, currentExtent))
+    if QgsWkbTypes.geometryType(geom.wkbType()) == QgsWkbTypes.GeometryType.PolygonGeometry:
+        if geom.isMultipart():
+            polygons = geom.asMultiPolygon()  # returns a list
+        else:
+            polygons = [geom.asPolygon()]
+        for polygon in polygons:
+            svg.extend(self.polygon2svg(feature, polygon, currentExtent))
     if QgsWkbTypes.geometryType(geom.wkbType()) == QgsWkbTypes.GeometryType.LineGeometry:
-        multiline = geom.asMultiPolyline()  # returns a list
-        for line in multiline:
+        if geom.isMultipart():
+            lines = geom.asMultiPolyline()
+        else:
+            lines = [geom.asPolyline()]
+        for line in lines:
             svg.extend(self.line2svg(feature, line, currentExtent))
-    svg.append(u'</g>\n');
+    svg.append(u'</g>\n')
     return svg
 
   def point2svg(self, point, currentExtent):

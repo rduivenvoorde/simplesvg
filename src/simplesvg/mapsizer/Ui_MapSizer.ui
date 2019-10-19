@@ -20,6 +20,9 @@
    <set>Qt::ImhFormattedNumbersOnly|Qt::ImhPreferNumbers</set>
   </property>
   <widget class="QSpinBox" name="spinBoxImageWidth">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>167</x>
@@ -48,6 +51,9 @@
    </property>
   </widget>
   <widget class="QSpinBox" name="spinBoxImageHeight">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>297</x>
@@ -76,6 +82,9 @@
    </property>
   </widget>
   <widget class="QPushButton" name="btnSetImageSize">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>430</x>
@@ -89,6 +98,9 @@
    </property>
   </widget>
   <widget class="QLabel" name="lblSetImageSize">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>20</x>
@@ -268,6 +280,9 @@
    </property>
   </widget>
   <widget class="Line" name="line">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>80</x>

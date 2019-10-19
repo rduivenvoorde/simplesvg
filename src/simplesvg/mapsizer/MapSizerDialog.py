@@ -23,7 +23,7 @@ import platform
 
 from qgis.PyQt.QtCore import *
 from qgis.PyQt.QtGui import *
-from qgis.PyQt.QtWidgets import QDialog
+from qgis.PyQt.QtWidgets import QDialog, QMessageBox
 
 from qgis.core import *
 
@@ -32,7 +32,7 @@ from .Ui_MapSizer import Ui_MapSizer
 # create the dialog for SimpleSvg
 class MapSizerDialog(QDialog):
 
-    MSG_BOX_TITLE = "QGis"
+    MSG_BOX_TITLE = "QGIS"
     LINUX_OFFSET = 0
     WINDOWS_OFFSET = 0
 
@@ -56,15 +56,11 @@ class MapSizerDialog(QDialog):
         self.ui.txtMinY.setText('%.6f'%(extent.yMinimum()))
         self.ui.txtMaxX.setText('%.6f'%(extent.xMaximum()))
         self.ui.txtMaxY.setText('%.6f'%(extent.yMaximum()))
-
-        #QObject.connect(self.mapCanvas, SIGNAL("renderComplete(QPainter *)"), self.mapCanvasResize)
         self.mapCanvas.renderComplete.connect(self.mapCanvasResize)
 
-    #@pyqtSignature("on_btnSetImageSize_clicked()")
     def on_btnSetImageSize_clicked(self):
         self.setMapCanvasSize(self.ui.spinBoxImageWidth.value(), self.ui.spinBoxImageHeight.value())
 
-    #@pyqtSignature("on_btnSetExtent_clicked()")
     def on_btnSetExtent_clicked(self):
         self.setMapCanvasExtent()
 
@@ -93,12 +89,7 @@ class MapSizerDialog(QDialog):
         self.ui.txtMaxY.setText('%.6f'%(extent.yMaximum()))
 
     def setMapCanvasSize(self, newWidth, newHeight):
-        if QGis.QGIS_VERSION_INT < 10900:
-            # on QGIS 1.8 the parent of mapCanvas == QMainWindow
-            parent=self.mapCanvas.parentWidget()
-        else:
-            # on QGIS>2.0 there is another widget in between
-            parent=self.mapCanvas.parentWidget().parentWidget()
+        parent=self.mapCanvas.parentWidget().parentWidget()
         mapCanvas=self.mapCanvas
         # some QT magic for me, coming from maximized force a minimal layout change first
         if(parent.isMaximized()):
