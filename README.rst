@@ -13,4 +13,4 @@ Issues: please here or at the project page: http://hub.qgis.org/projects/simples
 
 Want to buy me a beer (or gadget)? Please use the Paypal button below. Or contact me directly.
 
-[![paypal](https://www.paypalobjects.com/en_US/NL/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=DZ8R5JPAW55CJ&currency_code=EUR&source=url)
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RGQ8NSYPA59FL)
