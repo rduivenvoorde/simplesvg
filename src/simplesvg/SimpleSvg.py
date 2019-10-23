@@ -267,6 +267,7 @@ class SimpleSvg:
       return ""
     symbols = renderer.symbols(QgsRenderContext()) # TODO check, is this the right context?
     symbolFeatureMap = dict.fromkeys(symbols, [])
+    print(layer.name())
     id=self.sanitizeStr(str(layer.name()).lower())
     if labels:
         id=id+'_labels'
@@ -314,6 +315,7 @@ class SimpleSvg:
           fill = ''
           if 'fill' in sym:
             fill = 'fill="' + sym['fill'] + '"'
+          # TODO: we could check for sym['outline_style']=='no' and just do NOT write any stroke info...
           svg.append(u'<g stroke="' + sym['stroke'] + '" '+ fill + ' stroke-linejoin="' + self.strokeLineJoin + '" stroke-width="' + sym['stroke-width'] +'">\n')
         else:
           # TODO fix this, use color of label ??
@@ -325,16 +327,18 @@ class SimpleSvg:
           svg.append(u'<g stroke="none" fill="'+lblColor+'">\n')
         for feature in symbolFeatureMap[symbol]:
           i=i+1
-          # labeltxt is used both for the real labels, AND for the inkscape-label attributes of g and txt elements
+          # labeltxt is used both for the real labels
+          # displayField attribute of layer i used for the inkscape-label attributes
           labeltxt = self.sanitizeStr('')
           if lblSettings:
             labeltxt = self.sanitizeStr(feature[lblSettings.fieldName])
           if not labels:
               # we are going to use the 'displayName' == 'layer.displayField()' column as node-id/labelfor inkscape
               displayField = layer.displayField()
-              feature_label = id+str(i) # in case displayField is empty
-              if len(displayField)>0:
+              feature_label = id+str(i)  # in case displayField is empty
+              if len(displayField) > 0:
                 feature_label = self.sanitizeStr(feature[displayField])
+                print(feature_label)
               svg.extend(self.writeFeature(feature, id+str(i), feature_label))
           if labels:
             geom = feature.geometry().centroid()
@@ -366,6 +370,7 @@ class SimpleSvg:
     stylekey = u'style'
     width_outline = u'outline_width'
     width_line = u'line_width'
+    outline_style = u'outline_style'
     widthkey = u'width'
     if strokekey in slprops:
       stroke = slprops[strokekey]
@@ -376,6 +381,8 @@ class SimpleSvg:
     else:
       sym['stroke'] = u'none'
     # fill color: only non line features have fill color, lines have 'none'
+    if outline_style in slprops:
+        sym['outline_style'] = slprops[outline_style]
     geom = feature.geometry()
     if colorkey in slprops:
       fill = str(slprops[colorkey])
@@ -468,6 +475,7 @@ class SimpleSvg:
 
   def sanitizeStr(self, string):
     # TODO: find the right way to do this
+    # TODO2: should also remove markup, as sometimes there is markup in KML 'attributes'... creating havoc in svg
     return str(string).replace(' ','_').replace('/','_').replace(',','_').replace('.','_')
 
   def writeFeature(self, feature, fid, labelTxt):
@@ -649,7 +657,7 @@ class SimpleSvg:
           pixpoint =  self.w2p(point.x(), point.y(), self.iface.mapCanvas().mapUnitsPerPixel(), currentExtent.xMinimum(), currentExtent.yMaximum())
           if lastPixel != pixpoint:
             coordCount = coordCount +1
-            if self.svgType==SVG_TYPE_PATH and coordCount>1:
+            if self.svgType == SVG_TYPE_PATH and coordCount > 1:
               svg += 'L '
             svg += (str(pixpoint[0]) + ',' + str(pixpoint[1]) + ' ')
             lastPixel = pixpoint
