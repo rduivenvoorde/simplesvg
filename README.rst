@@ -1,5 +1,4 @@
-simplesvg
-=========
+# SimpleSVG
 
 This is a plugin for QGIS http://www.qgis.org
 
@@ -7,8 +6,10 @@ With this plugin you create svg for given map in QGIS which is better suited for
 
 More documentation can be found when you install the plugin, and press the help button there.
 
-Every release is uploaded to the QGIS plugin repository: http://plugins.qgis.org/plugins/simplesvg/ and can be downloaded and installed from within QGIS itself.
+Every release is uploaded to the QGIS plugin repository: http://plugins.qgis.org/plugins/simplesvg/ but better: can be downloaded and installed from within QGIS itself.
 
-Issues: please here or at the project page: http://hub.qgis.org/projects/simplesvg
+Issues: please create an issue here on github or just mail me.
 
-Want to buy me a beer (or gadget)? Please use Paypal button on the project page. Or contact me directly.
+Want to buy me a beer (or gadget)? Please use the Paypal button below. Or contact me directly.
+
+[![paypal](https://www.paypalobjects.com/en_US/NL/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=DZ8R5JPAW55CJ&currency_code=EUR&source=url)
