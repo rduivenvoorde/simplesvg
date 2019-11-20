@@ -82,8 +82,8 @@ SVG_TYPE_SHAPE = 2
 
 # pycharm debugging
 # COMMENT OUT BEFORE PACKAGING !!!
-import pydevd
-pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True, suspend=False)
+#import pydevd
+#pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True, suspend=False)
 
 class SimpleSvg:
 
