@@ -537,23 +537,32 @@ class SimpleSvg:
     #     point = geom.asPoint()
     #     svg.extend(self.point2svg(point, currentExtent))
     if QgsWkbTypes.geometryType(geom.wkbType()) == QgsWkbTypes.GeometryType.PointGeometry:
-        multipoint = geom.asMultiPoint()
-        for point in multipoint:
-          svg.extend(self.point2svg(point, currentExtent))
+        if geom.isMultipart():
+            multipoint = geom.asMultiPoint()
+            for point in multipoint:
+              svg.extend(self.point2svg(point, currentExtent))
+        else:
+            svg.extend(self.point2svg(geom.asPoint(), currentExtent))
     # if geom.wkbType() in (QgsWkbTypes.WKBPolygon, QgsWkbTypes.WKBPolygon25D): # 3 = WKBTYPE.WKBPolygon:
     #     polygon = geom.asPolygon()  # returns a list
     #     svg.extend(self.polygon2svg(feature, polygon, currentExtent))
     if QgsWkbTypes.geometryType(geom.wkbType()) == QgsWkbTypes.GeometryType.PolygonGeometry: # 6 = WKBTYPE.WKBMultiPolygon:
-        multipolygon = geom.asMultiPolygon() # returns a list
-        for polygon in multipolygon:
-          svg.extend(self.polygon2svg(feature, polygon, currentExtent))
+        if geom.isMultipart():
+            multipolygon = geom.asMultiPolygon() # returns a list
+            for polygon in multipolygon:
+              svg.extend(self.polygon2svg(feature, polygon, currentExtent))
+        else:
+            svg.extend(self.polygon2svg(feature, geom.asPolygon(), currentExtent))
     # if geom.wkbType() in (QgsWkbTypes.WKBLineString, QgsWkbTypes.WKBLineString25D): # 6 = WKBTYPE.WKBLineString:
     #     line = geom.asPolyline()  # returns a list of points
     #     svg.extend(self.line2svg(feature, line, currentExtent))
     if QgsWkbTypes.geometryType(geom.wkbType()) == QgsWkbTypes.GeometryType.LineGeometry:
-        multiline = geom.asMultiPolyline()  # returns a list
-        for line in multiline:
-            svg.extend(self.line2svg(feature, line, currentExtent))
+        if geom.isMultipart():
+            multiline = geom.asMultiPolyline()  # returns a list
+            for line in multiline:
+                svg.extend(self.line2svg(feature, line, currentExtent))
+        else:
+            svg.extend(self.line2svg(feature, geom.asPolyline(), currentExtent))
     svg.append(u'</g>\n');
     return svg
 
