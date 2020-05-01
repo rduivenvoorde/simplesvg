@@ -1,7 +1,7 @@
 ; the next section is mandatory
 [general]
 name:SimpleSvg
-version=3.0.0
+version=3.0.1
 qgisMinimumVersion:2.99
 qgisMaximumVersion:3.99
 description:Create simple SVG from current view, editable with Inkscape
@@ -12,11 +12,12 @@ about:Create simple SVG from current view, editable with Inkscape. Only for simp
 ; start of optional metadata
 
 changelog:
+    3.0.1   (04-2020): fix for single geoms error
     3.0.0   (10-2019): make work in QGIS3, no labels yet
     0.9.0   (10-2019): making stuff work in last QGIS 2.18 (see if somebody wants it to be ported to 3 :-) )
     0.8.5   (04-2014): making labels work again, but bump min version to 2.0, and keeping the layers and names usable in Inkscape
     0.8.4   (01-2014): fix http://hub.qgis.org/issues/7971 thanks Scott Heavner
-    0.8.3   (11-2013): fix with maprezing, thanks Christoph König, plus some other bugfixes
+    0.8.3   (11-2013): fix with mapresizing, thanks Christoph König, plus some other bugfixes
     0.8.2   (10-2013): fix for bug when saving raster
     0.8.1   (06-2013): work of Hien Tran-Quang, make it work for sip2 and QGIS2
     0.8     (06-2013): checkbox to just retrieve ALL features (meaning you actuall set a resolution for svg); more changes needed for QGIS 2.0 api (thanks Hien TRAN-QUANG)
