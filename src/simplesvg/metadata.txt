@@ -1,7 +1,7 @@
 ; the next section is mandatory
 [general]
 name:SimpleSvg
-version=3.0.1
+version=3.0.2
 qgisMinimumVersion:2.99
 qgisMaximumVersion:3.99
 description:Create simple SVG from current view, editable with Inkscape
@@ -12,6 +12,7 @@ about:Create simple SVG from current view, editable with Inkscape. Only for simp
 ; start of optional metadata
 
 changelog:
+    3.0.2   (10-2020): fix displayField as expression (multi column), fix open help
     3.0.1   (04-2020): fix for single geoms error
     3.0.0   (10-2019): make work in QGIS3, no labels yet
     0.9.0   (10-2019): making stuff work in last QGIS 2.18 (see if somebody wants it to be ported to 3 :-) )

@@ -299,6 +299,7 @@ class SimpleSvg:
     # now iterate through each feature and group by feature
     f = QgsFeature()
     feature = None
+    context = QgsExpressionContext(QgsExpressionContextUtils.globalProjectLayerScopes(layer))
     #print "1 symbols holds %s symbols" % len(symbols)
     while provider.nextFeature(f):
       feature = QgsFeature(f)
@@ -361,9 +362,16 @@ class SimpleSvg:
           labeltxt = self.sanitizeStr('')  # TODO: temp until labels fixed
 
           if not labels:
-              # we are going to use the 'displayName' == 'layer.displayField()' column as node-id/labelfor inkscape
-              feature_label = self.sanitizeStr(feature[layer.displayField()])
-              svg.extend(self.writeFeature(feature, id+str(i), feature_label))
+              # we are going to use the features 'displayName' == 'layer.displayField()' column as node-id/labelfor inkscape
+              # NOTE this can also be an expression:
+              if not layer.displayField() == '':
+                feature_label = feature[layer.displayField()]
+              elif not layer.displayExpression() == '':
+                context.setFeature(feature)
+                feature_label = QgsExpression(layer.displayExpression()).evaluate(context)
+              else:
+                feature_label = ''
+              svg.extend(self.writeFeature(feature, id+str(i), self.sanitizeStr(feature_label)))
           if labels:
             geom = feature.geometry().centroid()
             # centroid-method returns a NON-transformed centroid
