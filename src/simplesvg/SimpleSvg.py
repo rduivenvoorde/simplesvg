@@ -111,9 +111,7 @@ class SimpleSvg:
     self.iface.addToolBarIcon(self.action)
     self.dlg = SimpleSvgDialog(self.iface)
     self.dlg.setFilePath(self.svgFilename)
-    # TODO
-    #QObject.connect(self.dlg, SIGNAL("showHelp()"), self.showHelp)
-    #QObject.connect(self.dlg, SIGNAL("accepted()"), self.writeToFile)
+    self.dlg.showHelp.connect(self.showHelp)
     self.dlg.accepted.connect(self.writeToFile)
     #TODO
     #QObject.connect(self.dlg, SIGNAL("cbFeaturesInMapcanvasOnlyChanged"), self.setFeaturesInMapcanvasOnly)

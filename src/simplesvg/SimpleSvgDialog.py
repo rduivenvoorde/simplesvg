@@ -29,6 +29,9 @@ from .mapsizer.MapSizerDialog import MapSizerDialog
 
 # create the dialog for SimpleSvg
 class SimpleSvgDialog(QDialog):
+
+  showHelp = pyqtSignal()
+
   def __init__(self, iface): 
     QDialog.__init__(self) 
     # Set up the user interface from Designer. 
@@ -56,7 +59,8 @@ class SimpleSvgDialog(QDialog):
     self.hide()
 
   def on_buttonBox_helpRequested(self):
-    self.emit(SIGNAL("showHelp()") )
+    #self.emit(SIGNAL("showHelp()") )
+    self.showHelp.emit()
 
   def on_cbFeaturesInMapcanvasOnly_stateChanged(self):
     #print("CHANGE")
