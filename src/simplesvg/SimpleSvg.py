@@ -114,19 +114,17 @@ class SimpleSvg:
     self.dlg.showHelp.connect(self.showHelp)
     self.dlg.accepted.connect(self.writeToFile)
     #TODO
-    #QObject.connect(self.dlg, SIGNAL("cbFeaturesInMapcanvasOnlyChanged"), self.setFeaturesInMapcanvasOnly)
+    self.dlg.cbFeaturesInMapcanvasOnlyChanged.connect(self.setFeaturesInMapcanvasOnly)
 
     # about
     self.aboutAction = QAction(QIcon(":/plugins/simplesvg/help.png"), \
                           "About", self.iface.mainWindow())
     self.aboutAction.setWhatsThis("SimpleSvg Plugin About")
-    #QObject.connect(self.aboutAction, SIGNAL("activated()"), self.about)
     self.aboutAction.triggered.connect(self.about)
     # help
     self.helpAction = QAction(QIcon(":/plugins/simplesvg/help.png"), \
                           "Help", self.iface.mainWindow())
     self.helpAction.setWhatsThis("SimpleSvg Plugin Help")
-    #QObject.connect(self.helpAction, SIGNAL("activated()"), self.showHelp)
     self.helpAction.triggered.connect(self.showHelp)
     if hasattr(self.iface, "addPluginToWebMenu" ):
         self.iface.addPluginToWebMenu("&Save as SVG", self.action)

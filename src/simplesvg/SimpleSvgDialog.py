@@ -31,6 +31,7 @@ from .mapsizer.MapSizerDialog import MapSizerDialog
 class SimpleSvgDialog(QDialog):
 
   showHelp = pyqtSignal()
+  cbFeaturesInMapcanvasOnlyChanged = pyqtSignal(bool)
 
   def __init__(self, iface): 
     QDialog.__init__(self) 
@@ -59,12 +60,11 @@ class SimpleSvgDialog(QDialog):
     self.hide()
 
   def on_buttonBox_helpRequested(self):
-    #self.emit(SIGNAL("showHelp()") )
     self.showHelp.emit()
 
   def on_cbFeaturesInMapcanvasOnly_stateChanged(self):
-    #print("CHANGE")
-    self.emit(SIGNAL("cbFeaturesInMapcanvasOnlyChanged"), self.ui.cbFeaturesInMapcanvasOnly.isChecked())
+    #print(f"CHANGE on_cbFeaturesInMapcanvasOnly_stateChanged state {self.ui.cbFeaturesInMapcanvasOnly.isChecked()}")
+    self.cbFeaturesInMapcanvasOnlyChanged.emit(self.ui.cbFeaturesInMapcanvasOnly.isChecked())
 
   def getFilePath(self):
     return self.ui.txtFileName.text()
