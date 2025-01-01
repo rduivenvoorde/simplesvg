@@ -1,17 +1,17 @@
 ; the next section is mandatory
 [general]
-name:SimpleSvg
+name=SimpleSvg
 version=3.1.0
-qgisMinimumVersion:2.99
-qgisMaximumVersion:3.99
-description:Create simple SVG from current view, editable with Inkscape
-about:Create simple SVG from current view, editable with Inkscape. Only for simple styling and data. In QGIS3 there is better support for SVG
+qgisMinimumVersion=2.99
+qgisMaximumVersion=3.99
+description=Create simple SVG from current view, editable with Inkscape
+about=Create simple SVG from current view, editable with Inkscape. Only for simple styling and data. In QGIS3 there is better support for SVG
 ; end of mandatory metadata
 
 
 ; start of optional metadata
 
-changelog:
+changelog=
     3.1.0   (01-2025): fix needed styling and color changes
     3.0.3   (03-2022): fix the emit-issue for saving full dataset
     3.0.2   (10-2020): fix displayField as expression (multi column), fix open help
@@ -38,12 +38,12 @@ category=Web
 author=Richard Duivenvoorde
 email=richard@duif.net
 
-homepage:http://hub.qgis.org/projects/simplesvg
+homepage=http://hub.qgis.org/projects/simplesvg
 
-repository:https://github.com/rduivenvoorde/simplesvg
+repository=https://github.com/rduivenvoorde/simplesvg
 
-tracker:http://hub.qgis.org/projects/simplesvg/issues
+tracker=http://hub.qgis.org/projects/simplesvg/issues
 
-icon:icon.png
+icon=icon.png
 
 
