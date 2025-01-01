@@ -38,11 +38,11 @@ category=Web
 author=Richard Duivenvoorde
 email=richard@duif.net
 
-homepage=http://hub.qgis.org/projects/simplesvg
+homepage=https://github.com/rduivenvoorde/simplesvg
 
 repository=https://github.com/rduivenvoorde/simplesvg
 
-tracker=http://hub.qgis.org/projects/simplesvg/issues
+tracker=https://github.com/rduivenvoorde/simplesvg/issues
 
 icon=icon.png
 
