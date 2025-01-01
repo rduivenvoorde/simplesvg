@@ -23,6 +23,7 @@ BUGS:
 
 """
 import os.path
+import pathlib
 import re
 # Import the PyQt and QGIS libraries
 from qgis.PyQt.QtCore import *
@@ -105,8 +106,7 @@ class SimpleSvg:
 
   def initGui(self):
       # Create action that will start plugin configuration
-    self.action = QAction(QIcon(":/plugins/simplesvg/icon.png"), \
-            "Save as SVG", self.iface.mainWindow())
+    self.action = QAction(QIcon(":/plugins/simplesvg/icon.png"),  "Save as SVG", self.iface.mainWindow())
     # connect the action to the run method
     self.action.triggered.connect(self.run)
 
@@ -148,7 +148,14 @@ class SimpleSvg:
     QDesktopServices.openUrl( QUrl("file:" + docFile) )
 
   def writeToFile(self):
-      self.svgFilename = self.dlg.getFilePath()
+      self.svgFilename = pathlib.Path(self.dlg.getFilePath())
+      if not self.svgFilename.parent.exists():
+        msg = "Please provide a valid dir/path for the SVG file."
+        self.show_message_box("Warning", msg)
+      if self.svgFilename.suffix.lower() != ".svg":
+          self.svgFilename = pathlib.Path(self.svgFilename).with_suffix(".svg")
+      self.svgFilename = str(self.svgFilename)
+      self.dlg.setFilePath(self.svgFilename)
       # save this filename in settings for later
       QSettings().setValue('/simplesvg/lastfile', self.svgFilename)
       output = self.writeSVG()
@@ -158,15 +165,16 @@ class SimpleSvg:
           #print '%s - %s' % (type(line),line)
           file.write(line.encode('utf-8'))
       file.close()
-      QMessageBox.information(self.iface.mainWindow(), \
-              "SimpleSvg Plugin", "Finished writing to svg")
+      self.show_message_box("SimpleSvg Plugin", f"Finished writing to svg file:\n{self.svgFilename}")
+
+  def show_message_box(self, title, msg):
+      QMessageBox.information(self.iface.mainWindow(), title, msg)
 
   def about(self):
     infoString = "Written by Richard Duivenvoorde\nEmail - richard@duif.net\n"
     infoString += "Company - http://www.webmapper.net\n"
     infoString += "Source: http://github.com/rduivenvoorde/simplesvg/"
-    QMessageBox.information(self.iface.mainWindow(), \
-              "SimpleSvg Plugin About", infoString)
+    self.show_message_box("SimpleSvg Plugin About", infoString)
 
   def unload(self):
     # Remove the plugin menu item and icon
