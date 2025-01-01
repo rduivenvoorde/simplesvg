@@ -7,9 +7,13 @@
     <body>
         <h1>Simple SVG Qgis Plugin</h1>
         <p>
-        SimpleSvg is a plugin which tries to save current map as SVG. Other then the normal SaveAsSVG in the composer, this plugin tries to keep the GIS-grouping intact:
-        layers in Qgis will be layers in Inkscape, symbol classes will be groups. Objects will have ids with the layername in it, so the id's kan be used of a search in 
-        the xml-view of Inkscape.
+        SimpleSvg is a plugin which tries to save current QGIS map(canvas) as SVG. It's called SimpleSVG ONLY because it can handle
+            simple styling and renderers. So mainly useful to move geodata (with some simple styling) to Inkscape.
+        </p>
+        <p>
+        Other then the normal SaveAsSVG in the composer, this plugin tries to keep the GIS-grouping intact:
+        layers in Qgis will be layers in Inkscape, symbol classes will be groups. Objects will have ids with the
+            layername in it, so the id's kan be used of a search in the xml-view of Inkscape.
         </p>
         <p>
         The plugin uses the screen coordinates (pixel values) to set the svg coordinates.
@@ -20,8 +24,6 @@
         Be carefull though: fetching ALL data from big dataset can give other problems.
         </p>
         <p>
-        It can work with 'Old Symbology' and partially with 'New Symbology' both for vector- and raster layers. A raster layer  will be saved as image and included as an image element
-        with an external (to the file next to the svg).<br/>
         The plugin wil also work with layers which have 'on the fly' projection enabled.
         </p>
         <p>
@@ -65,6 +67,8 @@
 
     <p>
     <ul>
+
+        <li>3.1.0 (01-2025): fix needed styling and color changes
 
         <li>3.0.2 (10-2020): fix displayField as expression (multi column), fix open help
 
@@ -112,5 +116,5 @@
 
      <h2>Tips, comments, questions: richard at-sign duif.net (Richard Duivenvoorde)</h2>
 
-<body>
+</body>
 </html>
