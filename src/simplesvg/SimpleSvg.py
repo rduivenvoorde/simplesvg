@@ -148,23 +148,27 @@ class SimpleSvg:
 
   def writeToFile(self):
       self.svgFilename = pathlib.Path(self.dlg.getFilePath())
-      if not self.svgFilename.parent.exists():
-        msg = "Please provide a valid dir/path for the SVG file."
+      if self.dlg.getFilePath() in ("", None):
+          msg = "Please provide a valid dir/path for the SVG file."
+          self.show_message_box("Warning", msg)
+      elif not self.svgFilename.parent.exists():
+        msg = "Please provide a valid name for the SVG file, INCLUDING the path."
         self.show_message_box("Warning", msg)
-      if self.svgFilename.suffix.lower() != ".svg":
-          self.svgFilename = pathlib.Path(self.svgFilename).with_suffix(".svg")
-      self.svgFilename = str(self.svgFilename)
-      self.dlg.setFilePath(self.svgFilename)
-      # save this filename in settings for later
-      QSettings().setValue('/simplesvg/lastfile', self.svgFilename)
-      output = self.writeSVG()
-      file = open(self.svgFilename, "wb")
-      #print output
-      for line in output:
-          #print '%s - %s' % (type(line),line)
-          file.write(line.encode('utf-8'))
-      file.close()
-      self.show_message_box("SimpleSvg Plugin", f"Finished writing to svg file:\n{self.svgFilename}")
+      else:
+          if self.svgFilename.suffix.lower() != ".svg":
+              self.svgFilename = pathlib.Path(self.svgFilename).with_suffix(".svg")
+          self.svgFilename = str(self.svgFilename)
+          self.dlg.setFilePath(self.svgFilename)
+          # save this filename in settings for later
+          QSettings().setValue('/simplesvg/lastfile', self.svgFilename)
+          output = self.writeSVG()
+          file = open(self.svgFilename, "wb")
+          #print output
+          for line in output:
+              #print '%s - %s' % (type(line),line)
+              file.write(line.encode('utf-8'))
+          file.close()
+          self.show_message_box("SimpleSvg Plugin", f"Finished writing to svg file:\n{self.svgFilename}")
 
   def show_message_box(self, title, msg):
       QMessageBox.information(self.iface.mainWindow(), title, msg)
