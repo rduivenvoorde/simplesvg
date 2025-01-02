@@ -21,7 +21,6 @@ email                : richard@duif.net
 
 
 from qgis.PyQt.QtCore import *
-from qgis.PyQt.QtGui import *
 from qgis.PyQt.QtWidgets import QDialog, QFileDialog
 
 from .Ui_SimpleSvg import Ui_SimpleSvg

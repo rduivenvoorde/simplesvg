@@ -30,7 +30,6 @@ from qgis.PyQt.QtCore import *
 from qgis.PyQt.QtGui import *
 from qgis.PyQt.QtWidgets import QAction, QMessageBox
 from qgis.core import *
-from sympy.printing.pretty.pretty_symbology import line_width
 
 # Initialize Qt resources from file resources.py
 #import resources_rc
