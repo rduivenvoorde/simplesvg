@@ -332,7 +332,8 @@ class SimpleSvg:
         # start of symbol g-element, holds colors and stroke etc
         fill = 'fill="none"'
         if 'fill' in sym and sym['fill'] not in (None, 'none', 'None'):
-          fill = f'fill="{self.cleanup_rgb(sym['fill'])}"'
+          s = sym['fill']
+          fill = f'fill="{self.cleanup_rgb(s)}"'
         
         if labels:  # labels !
           # TODO fix this, use color of label ??
