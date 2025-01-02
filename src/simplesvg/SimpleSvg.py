@@ -85,8 +85,8 @@ SVG_TYPE_SHAPE = 2
 
 # pycharm debugging
 # COMMENT OUT BEFORE PACKAGING !!!
-# import pydevd_pycharm
-# pydevd_pycharm.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True, suspend=False)
+#import pydevd_pycharm
+#pydevd_pycharm.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True, suspend=False)
 
 class SimpleSvg:
 
@@ -115,7 +115,6 @@ class SimpleSvg:
     self.dlg.setFilePath(self.svgFilename)
     self.dlg.showHelp.connect(self.showHelp)
     self.dlg.accepted.connect(self.writeToFile)
-    #TODO
     self.dlg.cbFeaturesInMapcanvasOnlyChanged.connect(self.setFeaturesInMapcanvasOnly)
 
     # about
@@ -147,28 +146,35 @@ class SimpleSvg:
     QDesktopServices.openUrl( QUrl("file:" + docFile) )
 
   def writeToFile(self):
+      # first check IF there is a map:
+      if self.iface.mapCanvas().extent().isNull():
+          self.show_message_box("Error", "No map or MapCanvas yet, first create a map!")
+          return
+      # some filename checks:
       self.svgFilename = pathlib.Path(self.dlg.getFilePath())
       if self.dlg.getFilePath() in ("", None):
           msg = "Please provide a valid dir/path for the SVG file."
           self.show_message_box("Warning", msg)
+          return
       elif not self.svgFilename.parent.exists():
         msg = "Please provide a valid name for the SVG file, INCLUDING the path."
         self.show_message_box("Warning", msg)
-      else:
-          if self.svgFilename.suffix.lower() != ".svg":
-              self.svgFilename = pathlib.Path(self.svgFilename).with_suffix(".svg")
-          self.svgFilename = str(self.svgFilename)
-          self.dlg.setFilePath(self.svgFilename)
-          # save this filename in settings for later
-          QSettings().setValue('/simplesvg/lastfile', self.svgFilename)
-          output = self.writeSVG()
-          file = open(self.svgFilename, "wb")
-          #print output
-          for line in output:
-              #print '%s - %s' % (type(line),line)
-              file.write(line.encode('utf-8'))
-          file.close()
-          self.show_message_box("SimpleSvg Plugin", f"Finished writing to svg file:\n{self.svgFilename}")
+        return
+      # NOW create a svg
+      if self.svgFilename.suffix.lower() != ".svg":
+          self.svgFilename = pathlib.Path(self.svgFilename).with_suffix(".svg")
+      self.svgFilename = str(self.svgFilename)
+      self.dlg.setFilePath(self.svgFilename)
+      # save this filename in settings for later
+      QSettings().setValue('/simplesvg/lastfile', self.svgFilename)
+      output = self.writeSVG()
+      file = open(self.svgFilename, "wb")
+      #print output
+      for line in output:
+          #print '%s - %s' % (type(line),line)
+          file.write(line.encode('utf-8'))
+      file.close()
+      self.show_message_box("SimpleSvg Plugin", f"Finished writing to svg file:\n{self.svgFilename}")
 
   def show_message_box(self, title, msg):
       QMessageBox.information(self.iface.mainWindow(), title, msg)
@@ -288,6 +294,9 @@ class SimpleSvg:
     if str(renderer.type()) not in ("singleSymbol", "categorizedSymbol", "graduatedSymbol"):
       QMessageBox.information(self.iface.mainWindow(), "Warning", "New Symbology layer found for layer '"+layer.name()+"'\n\nThis layer uses a Renderer/Style which cannot be used with this plugin.\n\nThis layer will be ignored in export.")
       return ""
+    if isinstance(layer.renderer(), QgsCategorizedSymbolRenderer):
+      # not sure why, but... we need to do this first....:
+      layer.renderer().rebuildHash()
     symbols = renderer.symbols(QgsRenderContext()) # TODO check, is this the right context?
     symbolFeatureMap = dict.fromkeys(symbols, [])
     id = self.sanitizeStr(str(layer.name()).lower())
@@ -304,29 +313,15 @@ class SimpleSvg:
       geom = feature.geometry()
 
       if doCrsTransform:
-        if hasattr(geom, "transform"):
-          geom.transform(crsTransform)
-        else:
-          QMessageBox.warning(self.iface.mainWindow(), self.MSG_BOX_TITLE, ("Cannot crs-transform geometry in your QGIS version ...\n" "Only QGIS version 1.5 and above can transform geometries on the fly\n" "As a workaround, you can try to save the layer in the destination crs (eg as shapefile) and reload that layer...\n"), QMessageBox.Ok, QMessageBox.Ok)
-          break
+        geom.transform(crsTransform)
 
       symbol = self.symbolForFeature(layer, feature)
 
       #print "feature: %s  symbol: %s rgb: %s %s %s" % (feature, symbol, symbol.color().red(), symbol.color().green(), symbol.color().blue())
-      # Continous Color does NOT have all symbols, but ONLY start and end color
-      # that's why we do some extra stuff here...
-      # ONLY needed for Old Symbology (which have 'name()' and not 'type()')
-      if hasattr(renderer, 'name') and renderer.name() == "Continuous Color":
-        symbols.append(symbol)
-        if symbol in symbolFeatureMap:
-            symbolFeatureMap[symbol]=[feature]
-        else:
-            symbolFeatureMap.update({symbol:[feature]})
+      if not symbol in symbolFeatureMap or len(symbolFeatureMap[symbol])==0:
+        symbolFeatureMap[symbol]=[feature]
       else:
-        if not symbol in symbolFeatureMap or len(symbolFeatureMap[symbol])==0:
-          symbolFeatureMap[symbol]=[feature]
-        else:
-          symbolFeatureMap[symbol].append(feature)
+        symbolFeatureMap[symbol].append(feature)
     # now iterate over symbols IF there are any features in this view from this layer
     if feature != None:
       id = id+'_'
@@ -397,6 +392,10 @@ class SimpleSvg:
      rgb(219,30,42,255)
     but now like:
      rgb(219,30,42,255,rgb:0.85882352941176465,0.11764705882352941,0.16470588235294117)
+    or:
+     0,0,0,255,rgb:0,0,0,1
+    or:
+     65,206,152,255,hsv:0.43611111111111112,0.68627450980392157,0.80784313725490198,1
 
     Inkscape wants 'rgb(r,g,b)'
     :return:
@@ -451,7 +450,7 @@ class SimpleSvg:
     # fill color: only non line features have fill color, lines have 'none'
     geom = feature.geometry()
     if colorkey in slprops:
-      fill = str(slprops[colorkey])
+      fill = self.cleanup_rgb(slprops[colorkey])
       if QgsWkbTypes.geometryType(geom.wkbType()) == QgsWkbTypes.GeometryType.LineGeometry:
         sym['stroke'] = self.cleanup_rgb(fill)
       # points have fill and stroke
@@ -584,7 +583,9 @@ class SimpleSvg:
 
   def symbolForFeature(self, layer, feature):
       if isinstance(layer.renderer(), QgsCategorizedSymbolRenderer):
-          return layer.renderer().symbols(QgsRenderContext())[feature[layer.renderer().classAttribute()]]
+          # not sure why, but... we need to do this first....:
+          #layer.renderer().rebuildHash()
+          return layer.renderer().symbolForValue2(feature[layer.renderer().classAttribute()])[0]
       elif isinstance(layer.renderer(), QgsGraduatedSymbolRenderer):
           return layer.renderer().symbolForValue(feature[layer.renderer().classAttribute()])
       else:
@@ -681,36 +682,4 @@ class SimpleSvg:
     pixX = (x - minx)/mupp
     pixY = (y - maxy)/mupp
     return [int(pixX), int(-pixY)]
-
-
-
-#class SvgFeatureRenderer2:
-#
-#    def __init__(self, graphic, feature, symbol):
-#        self.graphic = graphic
-#        self.feature = feature
-#        self.symbol = symbol
-#
-#    def render(self):
-#        # this one is for renderv2 only
-#        # for now only symbollayer[0]
-#        if symbol.symbolLayerCount()>1:
-#            print "TOO MUCH SYMBOLLAYERS... ONLY SYMBOLS WITH ONE SYMBOLLAYER ALLOWED"
-#            return
-#        props = symbol.symbolLayer(0)
-#        print props['color']
-#        print 'rgb('++')'
-#        # conclusion: no internal or external styles, styles as attributes either in group g-elements OR in individual path-elements
-#
-#    def renderLayer(self):
-#        pass
-#
-#    def renderFeature(self, feature):
-#        pass
-#
-#    def renderGeometry(self, feature):
-#        pass
-#
-#    def renderSymbol(selfi, symbol):
-#        pass
 

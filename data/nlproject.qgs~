@@ -1,5 +1,5 @@
 <!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
-<qgis projectname="" saveUser="richard" saveDateTime="2024-12-31T17:30:09" saveUserFull="richard" version="3.41.0-Master">
+<qgis projectname="" saveUser="richard" saveDateTime="2024-12-31T17:45:09" saveUserFull="richard" version="3.41.0-Master">
   <homePath path=""/>
   <title></title>
   <transaction mode="Disabled"/>
@@ -35,22 +35,22 @@
     <customproperties>
       <Option/>
     </customproperties>
-    <layer-tree-layer name="nl plaatsen" legend_exp="" id="nl_plaatsen20191018112738941" expanded="1" source="./nl.gpkg|layername=plaatsen" legend_split_behavior="0" providerKey="ogr" patch_size="0,0" checked="Qt::Unchecked">
+    <layer-tree-layer name="nl plaatsen" legend_exp="" id="nl_plaatsen20191018112738941" expanded="1" source="./nl.gpkg|layername=plaatsen" legend_split_behavior="0" providerKey="ogr" patch_size="0,0" checked="Qt::Checked">
       <customproperties>
         <Option/>
       </customproperties>
     </layer-tree-layer>
-    <layer-tree-layer name="nl plaatsen copy" legend_exp="" id="nl_plaatsen_50b218e3_03dd_48ac_a809_76e332e3a2ae" expanded="1" source="./nl.gpkg|layername=plaatsen" legend_split_behavior="0" providerKey="ogr" patch_size="-1,-1" checked="Qt::Checked">
+    <layer-tree-layer name="nl plaatsen copy" legend_exp="" id="nl_plaatsen_50b218e3_03dd_48ac_a809_76e332e3a2ae" expanded="1" source="./nl.gpkg|layername=plaatsen" legend_split_behavior="0" providerKey="ogr" patch_size="-1,-1" checked="Qt::Unchecked">
       <customproperties>
         <Option/>
       </customproperties>
     </layer-tree-layer>
-    <layer-tree-layer name="nl — bevolkingskernen2011" legend_exp="" id="bevolkingskernen2011_9cabd0a2_38bd_4e54_b8cc_95dcbc7ee256" expanded="1" source="./nl.gpkg|layername=bevolkingskernen2011" legend_split_behavior="0" providerKey="ogr" patch_size="-1,-1" checked="Qt::Unchecked">
+    <layer-tree-layer name="nl — bevolkingskernen2011" legend_exp="" id="bevolkingskernen2011_9cabd0a2_38bd_4e54_b8cc_95dcbc7ee256" expanded="1" source="./nl.gpkg|layername=bevolkingskernen2011" legend_split_behavior="0" providerKey="ogr" patch_size="-1,-1" checked="Qt::Checked">
       <customproperties>
         <Option/>
       </customproperties>
     </layer-tree-layer>
-    <layer-tree-layer name="nl provincies" legend_exp="" id="nl_provincies20191018112738947" expanded="0" source="./nl.gpkg|layername=provincies" legend_split_behavior="0" providerKey="ogr" patch_size="0,0" checked="Qt::Unchecked">
+    <layer-tree-layer name="nl provincies" legend_exp="" id="nl_provincies20191018112738947" expanded="0" source="./nl.gpkg|layername=provincies" legend_split_behavior="0" providerKey="ogr" patch_size="0,0" checked="Qt::Checked">
       <customproperties>
         <Option/>
       </customproperties>
@@ -75,10 +75,10 @@
   <mapcanvas name="theMapCanvas" annotationsVisible="1">
     <units>meters</units>
     <extent>
-      <xmin>95582.07869426619436126</xmin>
-      <ymin>419008.19330909103155136</ymin>
-      <xmax>114324.35472024038608652</xmax>
-      <ymax>461731.17282276600599289</ymax>
+      <xmin>86977.76339049891976174</xmin>
+      <ymin>389693.65659663104452193</ymin>
+      <xmax>124462.31544244730321225</xmax>
+      <ymax>475139.61562398099340498</ymax>
     </extent>
     <rotation>0</rotation>
     <destinationsrs>
@@ -99,24 +99,24 @@
   </mapcanvas>
   <projectModels/>
   <legend updateDrawingOrder="true">
-    <legendlayer name="nl plaatsen" drawingOrder="-1" showFeatureCount="0" open="true" checked="Qt::Unchecked">
+    <legendlayer name="nl plaatsen" drawingOrder="-1" showFeatureCount="0" open="true" checked="Qt::Checked">
       <filegroup hidden="false" open="true">
-        <legendlayerfile visible="0" layerid="nl_plaatsen20191018112738941" isInOverview="0"/>
+        <legendlayerfile visible="1" layerid="nl_plaatsen20191018112738941" isInOverview="0"/>
       </filegroup>
     </legendlayer>
-    <legendlayer name="nl plaatsen copy" drawingOrder="-1" showFeatureCount="0" open="true" checked="Qt::Checked">
+    <legendlayer name="nl plaatsen copy" drawingOrder="-1" showFeatureCount="0" open="true" checked="Qt::Unchecked">
       <filegroup hidden="false" open="true">
-        <legendlayerfile visible="1" layerid="nl_plaatsen_50b218e3_03dd_48ac_a809_76e332e3a2ae" isInOverview="0"/>
+        <legendlayerfile visible="0" layerid="nl_plaatsen_50b218e3_03dd_48ac_a809_76e332e3a2ae" isInOverview="0"/>
       </filegroup>
     </legendlayer>
-    <legendlayer name="nl — bevolkingskernen2011" drawingOrder="-1" showFeatureCount="0" open="true" checked="Qt::Unchecked">
+    <legendlayer name="nl — bevolkingskernen2011" drawingOrder="-1" showFeatureCount="0" open="true" checked="Qt::Checked">
       <filegroup hidden="false" open="true">
-        <legendlayerfile visible="0" layerid="bevolkingskernen2011_9cabd0a2_38bd_4e54_b8cc_95dcbc7ee256" isInOverview="0"/>
+        <legendlayerfile visible="1" layerid="bevolkingskernen2011_9cabd0a2_38bd_4e54_b8cc_95dcbc7ee256" isInOverview="0"/>
       </filegroup>
     </legendlayer>
-    <legendlayer name="nl provincies" drawingOrder="-1" showFeatureCount="0" open="false" checked="Qt::Unchecked">
+    <legendlayer name="nl provincies" drawingOrder="-1" showFeatureCount="0" open="false" checked="Qt::Checked">
       <filegroup hidden="false" open="false">
-        <legendlayerfile visible="0" layerid="nl_provincies20191018112738947" isInOverview="0"/>
+        <legendlayerfile visible="1" layerid="nl_provincies20191018112738947" isInOverview="0"/>
       </filegroup>
     </legendlayer>
   </legend>
@@ -4945,7 +4945,7 @@ def my_form_open(dialog, layer, feature):
   <Sensors/>
   <ProjectViewSettings UseProjectScales="0" rotation="0">
     <Scales/>
-    <DefaultViewExtent xmax="126446.16178567131282762" ymin="419008.19330909103155136" xmin="83460.27162883526762016" ymax="461731.17282276600599289">
+    <DefaultViewExtent xmax="148705.92957330914214253" ymin="389693.65659663104452193" xmin="62734.14925963706627954" ymax="475139.61562398099340498">
       <spatialrefsys nativeFormat="Wkt">
         <wkt>PROJCRS["Amersfoort / RD New",BASEGEOGCRS["Amersfoort",DATUM["Amersfoort",ELLIPSOID["Bessel 1841",6377397.155,299.1528128,LENGTHUNIT["metre",1]]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],ID["EPSG",4289]],CONVERSION["RD New",METHOD["Oblique Stereographic",ID["EPSG",9809]],PARAMETER["Latitude of natural origin",52.1561605555556,ANGLEUNIT["degree",0.0174532925199433],ID["EPSG",8801]],PARAMETER["Longitude of natural origin",5.38763888888889,ANGLEUNIT["degree",0.0174532925199433],ID["EPSG",8802]],PARAMETER["Scale factor at natural origin",0.9999079,SCALEUNIT["unity",1],ID["EPSG",8805]],PARAMETER["False easting",155000,LENGTHUNIT["metre",1],ID["EPSG",8806]],PARAMETER["False northing",463000,LENGTHUNIT["metre",1],ID["EPSG",8807]]],CS[Cartesian,2],AXIS["easting (X)",east,ORDER[1],LENGTHUNIT["metre",1]],AXIS["northing (Y)",north,ORDER[2],LENGTHUNIT["metre",1]],USAGE[SCOPE["Engineering survey, topographic mapping."],AREA["Netherlands - onshore, including Waddenzee, Dutch Wadden Islands and 12-mile offshore coastal zone."],BBOX[50.75,3.2,53.7,7.22]],ID["EPSG",28992]]</wkt>
         <proj4>+proj=sterea +lat_0=52.1561605555556 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +units=m +no_defs</proj4>
